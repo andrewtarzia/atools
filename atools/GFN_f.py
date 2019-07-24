@@ -17,15 +17,16 @@ import subprocess
 
 
 def run_GFN():
-    '''
+    """
 
-    '''
+    """
 
 
 def check_GFN_complete(out_file):
-    '''Checks if GFN job is completing by searching out_file for '* finished run on'.
+    """
+    Checks if GFN job is completing by searching out_file for '* finished run on'.
 
-    '''
+    """
     lines = open(out_file, 'r').readlines()
     for line in reversed(lines):
         if '* finished run on' in line:
@@ -35,7 +36,8 @@ def check_GFN_complete(out_file):
 
 def GFN_from_xyzs(xyzs, GFN_exec='/home/atarzia/software/xtb_190418/bin/xtb',
                   P=1):
-    '''Run GFN calculation using standard parameters and an xctrl file.
+    """
+    Run GFN calculation using standard parameters and an xctrl file.
 
     Parameters
     ----------
@@ -53,18 +55,18 @@ def GFN_from_xyzs(xyzs, GFN_exec='/home/atarzia/software/xtb_190418/bin/xtb',
     failed : :class:`list` of :class:`str`
         List of XYZ files whose GFN jobs failed
 
-    '''
+    """
     logging.info(f'running GFN using {GFN_exec}')
     if len(xyzs) == 0:
         return []
     setup_dirs(xyzs, xctrl='default')
     # select a GFN execution.
     print('most setup should be in the xctrl file that is in this directory!')
-    print('''Option 1: -I xctrl --hess  <<< SPE, no solvent
+    print("""Option 1: -I xctrl --hess  <<< SPE, no solvent
     Option 2: -I xctrl --hess --gbsa <<< SPE, w solvent in xctrl
     Option 3: -I xctrl --ohess   <<< opt, no solvent in xctrl
     Option 4: -I xctrl --ohess --gbsa  <<< opt, w solvent in xctrl
-    ''')
+    """)
     option = input('select an option!')
     if option == '1':
         part_2 = '-I xctrl --hess '
@@ -108,10 +110,11 @@ def GFN_from_xyzs(xyzs, GFN_exec='/home/atarzia/software/xtb_190418/bin/xtb',
 
 
 def default_xctrl():
-    '''String to write to xctrl file for default GFN calculations.
+    """
+    String to write to xctrl file for default GFN calculations.
 
-    '''
-    string = '''
+    """
+    string = """
 $gfn
 method=2
 $opt
@@ -121,14 +124,15 @@ temp=300
 broydamp=0.4
 $thermo
 temp=298.15
-'''
+"""
     return string
 
 
 def setup_dirs(xyzs, xctrl='default'):
-    '''Setup directories for a series of XYZ files (in xyzs).
+    """
+    Setup directories for a series of XYZ files (in xyzs).
 
-    '''
+    """
     for i in xyzs:
         file = i.replace('.xyz', '')
         print(file)
@@ -148,7 +152,8 @@ def setup_dirs(xyzs, xctrl='default'):
 
 
 def get_energies(output_file, GFN_exec):
-    """Get the numbers from output file.
+    """
+    Get the numbers from output file.
 
     Obtained results (in a.u.):
         - free energies (FE)

@@ -17,11 +17,12 @@ import sys
 
 
 def calculate_RMSD(results_part, structure_name, init_structure_dir):
-    '''Calculate RMSD of GFN output structure compared to initial structure.
+    """
+    Calculate RMSD of GFN output structure compared to initial structure.
 
     Code from James Pegg.
 
-    '''
+    """
     # read in initial structure
     initial_structure_file = init_structure_dir + structure_name + '.xyz'
     ref = mda.Universe(initial_structure_file)
@@ -37,7 +38,8 @@ def calculate_RMSD(results_part, structure_name, init_structure_dir):
 
 
 def calc_formation_energy(prod, react):
-    '''Calculate formation energy of 'A' in a.u. from 2 lists of energies.
+    """
+    Calculate formation energy of 'A' in a.u. from 2 lists of energies.
 
     Reaction formation energy == sum(product energy) - sum(reactant energy)
 
@@ -48,15 +50,16 @@ def calc_formation_energy(prod, react):
     Returns:
         RFE (float) - Reaction formation energy in a.u.
 
-    '''
+    """
     RFE = sum(prod) - sum(react)
     return RFE
 
 
 def get_formation_energies(data, ff='OPLS'):
-    '''Calculate formation energies based on prod - react energies.
+    """
+    Calculate formation energies based on prod - react energies.
 
-    '''
+    """
     # by definition
     if ff == 'OPLS':
         H2O_energy = 0.0
@@ -77,7 +80,8 @@ def get_formation_energies(data, ff='OPLS'):
 
 
 def unit_vector(vector):
-    """ Returns the unit vector of the vector.
+    """
+    Returns the unit vector of the vector.
 
     https://stackoverflow.com/questions/2827393/angles-between-two-n-dimensional-vectors-in-python/13849249#13849249
     """
@@ -102,12 +106,13 @@ def angle_between(v1, v2):
 
 
 def get_dihedral(pt1, pt2, pt3, pt4):
-    '''Calculate the dihedral (-pi to pi) between four points using Praxeolitic formula
+    """
+    Calculate the dihedral (-pi to pi) between four points using Praxeolitic formula
     1 sqrt, 1 cross product
 
     From: https://stackoverflow.com/questions/20305272/dihedral-torsion-angle-from-four-points-in-cartesian-coordinates-in-python
     (new_dihedral(p))
-    '''
+    """
     p0 = np.asarray(pt1)
     p1 = np.asarray(pt2)
     p2 = np.asarray(pt3)

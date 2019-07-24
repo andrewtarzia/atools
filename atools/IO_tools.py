@@ -17,9 +17,10 @@ from pymatgen.io.cif import CifParser
 
 
 def convert_MOL3000_2_PDB_XYZ(file):
-    '''Convert MOL from stk to PDB and XYZ file. Return None.
+    """
+    Convert MOL from stk to PDB and XYZ file. Return None.
 
-    '''
+    """
     OPTIONS['cache'] = False  # turn caching off for loading
     pdbfile = file.replace('.mol', '.pdb')
     # read in mol into stk
@@ -30,9 +31,10 @@ def convert_MOL3000_2_PDB_XYZ(file):
 
 
 def check_ASE_handle(file, wstruct=True):
-    '''Check if ASE handles the reading of a given file.
+    """
+    Check if ASE handles the reading of a given file.
 
-    '''
+    """
     try:
         structure = read(file)
         if wstruct:
@@ -54,9 +56,10 @@ def check_ASE_handle(file, wstruct=True):
 
 
 def convert_CIF_2_PDB(file, wstruct=True):
-    '''Convert CIF to PDB file, save and return structure.
+    """
+    Convert CIF to PDB file, save and return structure.
 
-    '''
+    """
     pdb_file = file.replace('.cif', '.pdb')
     print('converting:', file, 'to', pdb_file)
     if isfile(pdb_file) is False:
@@ -84,10 +87,11 @@ def convert_CIF_2_PDB(file, wstruct=True):
 
 
 def convert_PDB_2_XYZ(file, comment=None):
-    '''Convert PDB to standard (NOT exteneded) XYZ file, save and
+    """
+    Convert PDB to standard (NOT exteneded) XYZ file, save and
     return structure
 
-    '''
+    """
     xyz_file = file.replace('.pdb', '.xyz')
     print('converting:', file, 'to', xyz_file)
     if isfile(xyz_file) is False:
@@ -104,9 +108,10 @@ def convert_PDB_2_XYZ(file, comment=None):
 
 
 def read_cif_pmg(file, primitive=False):
-    '''A function to read CIFs with pymatgen and suppress warnings.
+    """
+    A function to read CIFs with pymatgen and suppress warnings.
 
-    '''
+    """
     s = CifParser(file, occupancy_tolerance=100)
     struct = s.get_structures(primitive=primitive)[0]
     return struct

@@ -16,9 +16,10 @@ import matplotlib.colors as colors
 
 
 def parity_plot(X, Y, xtitle, ytitle, lim):
-    '''Make parity plot.
+    """
+    Make parity plot.
 
-    '''
+    """
     fig, ax = plt.subplots(figsize=(5, 5))
     ax.scatter(X, Y, c='firebrick', edgecolors='k',
                marker='o', alpha=1.0, s=80)
@@ -37,9 +38,10 @@ def parity_plot(X, Y, xtitle, ytitle, lim):
 def scatter_plot(X, Y, xtitle, ytitle, xlim, ylim, title=None,
                  c='firebrick', edgecolors='k',
                  marker='o', alpha=1.0, s=80, Z=None, cmap=None):
-    '''Make scatter plot.
+    """
+    Make scatter plot.
 
-    '''
+    """
     fig, ax = plt.subplots(figsize=(8, 5))
     if cmap is None and Z is None:
         ax.scatter(X, Y, c=c, edgecolors=edgecolors,
@@ -66,9 +68,10 @@ def scatter_plot(X, Y, xtitle, ytitle, xlim, ylim, title=None,
 
 def histogram_plot_1(Y, X_range, width, alpha, color, edgecolor,
                      xtitle, density=False):
-    '''Make histogram plot with 1 distribution.
+    """
+    Make histogram plot with 1 distribution.
 
-    '''
+    """
 
     fig, ax = plt.subplots(figsize=(8, 5))
     X_bins = np.arange(X_range[0], X_range[1], width)
@@ -95,7 +98,7 @@ def flat_line(ax, x, y, w=0, C='k', m='x'):
 
 
 def shiftedColorMap(cmap, start=0, midpoint=0.5, stop=1.0, name='shiftedcmap'):
-    '''
+    """
     Function to offset the "center" of a colormap. Useful for
     data with a negative min and positive max and you want the
     middle of the colormap's dynamic range to be at zero
@@ -118,7 +121,7 @@ def shiftedColorMap(cmap, start=0, midpoint=0.5, stop=1.0, name='shiftedcmap'):
       stop : Offset from highets point in the colormap's range.
           Defaults to 1.0 (no upper ofset). Should be between
           `midpoint` and 1.0.
-    '''
+    """
     cdict = {
         'red': [],
         'green': [],
@@ -145,7 +148,8 @@ def shiftedColorMap(cmap, start=0, midpoint=0.5, stop=1.0, name='shiftedcmap'):
 
 
 def define_plot_cmap(fig, ax, mid_point, cmap, ticks, labels, cmap_label):
-    """Define cmap shifted to midpoint and plot colourbar
+    """
+    Define cmap shifted to midpoint and plot colourbar
 
     """
     new_cmap = shiftedColorMap(cmap, midpoint=mid_point, name='shifted')

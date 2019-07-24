@@ -19,7 +19,8 @@ from rdkit.Geometry import rdGeometry
 
 
 def calculate_all_MW(molecules):
-    """Calculate the molecular weight of all molecules in DB dictionary.
+    """
+    Calculate the molecular weight of all molecules in DB dictionary.
 
     {name: SMILES}
 
@@ -32,7 +33,8 @@ def calculate_all_MW(molecules):
 
 
 def draw_smiles_to_svg(smiles, filename):
-    """Draw a single molecule to an SVG file with transparent BG.
+    """
+    Draw a single molecule to an SVG file with transparent BG.
 
     """
     mol = Chem.MolFromSmiles(smiles)
@@ -47,11 +49,12 @@ def draw_smiles_to_svg(smiles, filename):
 
 def mol_list2grid(molecules, filename, mol_per_row, maxrows,
                   subImgSize=(200, 200), names=None):
-    '''Produce a grid of molecules in mol_list.
+    """
+    Produce a grid of molecules in mol_list.
 
     molecules (list) - list of molecule SMILEs
 
-    '''
+    """
     if len(molecules) > mol_per_row * maxrows:
         # have to make multiple images
         new_mol_list = []
@@ -78,7 +81,8 @@ def mol_list2grid(molecules, filename, mol_per_row, maxrows,
 
 
 def read_mol_txt_file(filename):
-    """Function to read molecule SMILES and information from txt file.
+    """
+    Function to read molecule SMILES and information from txt file.
 
     """
     data = pd.read_table(filename, delimiter=':')
@@ -99,7 +103,8 @@ def read_mol_txt_file(filename):
 
 
 def get_inertial_prop(mol, cids):
-    """Get inertial 3D descriptors for all conformers in mol.
+    """
+    Get inertial 3D descriptors for all conformers in mol.
 
     """
     # ratio 1 is I1/I3
@@ -117,7 +122,8 @@ def get_inertial_prop(mol, cids):
 
 
 def get_COMs(mol, cids):
-    """Get COM of all conformers of mol.
+    """
+    Get COM of all conformers of mol.
 
     Code from:
     https://iwatobipen.wordpress.com/2016/08/16/scoring-3d-diversity-using-rdkit-rdkit/
@@ -143,7 +149,8 @@ def get_COMs(mol, cids):
 
 
 def def_point(x, y, z):
-    """Define a 3D point in RDKIT
+    """
+    Define a 3D point in RDKIT
 
     """
     point = rdGeometry.Point3D()
@@ -155,7 +162,8 @@ def def_point(x, y, z):
 
 
 def smiles2conformers(smiles, N=10, optimize=True):
-    '''Convert smiles string to N conformers.
+    """
+    Convert smiles string to N conformers.
 
     Keyword Arguments:
         smiles (str) - smiles string for molecule
@@ -164,7 +172,7 @@ def smiles2conformers(smiles, N=10, optimize=True):
 
     Returns:
         mol (RDKit molecule ::class::) - contains N conformers
-    '''
+    """
     # Read SMILES and add Hs
     mol = Chem.MolFromSmiles(smiles)
     if mol is None:
