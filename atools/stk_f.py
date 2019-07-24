@@ -303,15 +303,15 @@ def optimize_structunit(infile, outfile, exec,
     Read file into StructUnit and run optimization via method.
 
     """
-    # use standard settings applied in andrew_marsh work if
-    # md/settings is None
+    logging.info(f'loading in: {infile}')
+    struct = load_StructUnitX(infile, X=0)
     if method == 'OPLS':
+        # Use standard settings applied in andrew_marsh work if
+        # md/settings is None.
         if settings is None:
             Settings = default_stk_MD_settings()
         else:
             Settings = settings
-        logging.info(infile)
-        struct = load_StructUnitX(infile, X=0)
         logging.info(f'doing MD optimization of {infile}')
         # restricted=False optimization with OPLS forcefield by default
         ff = stk.MacroModelForceField(
@@ -335,6 +335,19 @@ def optimize_structunit(infile, outfile, exec,
         )
         macromodel = stk.OptimizerSequence(ff, md)
         macromodel.optimize(mol=struct)
+        struct.write(outfile)
+        logging.info('done')
+    elif method == 'xtb':
+        logging.info(f'doing xTB optimization of {infile}')
+        xtb_opt = stk.XTB(
+            xtb_path=exec,
+            output_dir='xtb_opt',
+            opt_level='tight',
+            max_runs=1,
+            calculate_hessian=False,
+            unlimited_memory=True
+        )
+        xtb_opt.optimize(struct)
         struct.write(outfile)
         logging.info('done')
     else:
