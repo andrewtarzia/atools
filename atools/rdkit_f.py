@@ -16,6 +16,7 @@ from rdkit.Chem import Descriptors, Draw
 from rdkit.Chem.Descriptors3D import NPR1, NPR2, PMI1, PMI2, PMI3
 from rdkit.Chem.Draw.MolDrawing import DrawingOptions
 from rdkit.Geometry import rdGeometry
+import pandas as pd
 
 
 def calculate_all_MW(molecules):
@@ -32,19 +33,28 @@ def calculate_all_MW(molecules):
         print(m, '---', smile, '---', 'MW =', MW, 'g/mol')
 
 
+def draw_mol_to_svg(mol, filename):
+    """
+    Draw a single molecule to an SVG file with transparent BG.
+
+    """
+    # change BG to transperent
+    # (https://sourceforge.net/p/rdkit/mailman/message/31637105/)
+    o = DrawingOptions()
+    o.bgColor = None
+    Chem.Compute2DCoords(mol)
+    Draw.MolToFile(
+        mol, filename, fitImage=True, imageType='svg', options=o
+    )
+
+
 def draw_smiles_to_svg(smiles, filename):
     """
     Draw a single molecule to an SVG file with transparent BG.
 
     """
     mol = Chem.MolFromSmiles(smiles)
-    # change BG to transperent
-    # (https://sourceforge.net/p/rdkit/mailman/message/31637105/)
-    o = DrawingOptions()
-    o.bgColor = None
-    Chem.Compute2DCoords(mol)
-    Draw.MolToFile(mol, filename, fitImage=True, imageType='svg',
-                   options=o)
+    draw_mol_to_svg(mol, filename)
 
 
 def mol_list2grid(molecules, filename, mol_per_row, maxrows,
@@ -92,7 +102,8 @@ def read_mol_txt_file(filename):
         # try:
         #     name, smile, radius = line.rstrip().split(':')
         # except ValueError:
-        #     print(line, 'had : in there twice, fix this naming or SMILE')
+        #     print(line, 'had : in there twice,
+        #     fix this naming or SMILE')
         #     print('skipped')
         name = row['molecule']
         smile = row['smile']
@@ -126,7 +137,8 @@ def get_COMs(mol, cids):
     Get COM of all conformers of mol.
 
     Code from:
-    https://iwatobipen.wordpress.com/2016/08/16/scoring-3d-diversity-using-rdkit-rdkit/
+    https://iwatobipen.wordpress.com/2016/08/16/
+    scoring-3d-diversity-using-rdkit-rdkit/
 
     """
     coms = []
@@ -135,13 +147,21 @@ def get_COMs(mol, cids):
         # print('conf:', confId)
         # print('number of atoms:', numatoms)
         conf = mol.GetConformer(confId)
-        coords = np.array([list(conf.GetAtomPosition(atmidx)) for atmidx in range(numatoms)])
+        coords = np.array([
+            list(
+                conf.GetAtomPosition(atmidx))
+            for atmidx in range(numatoms)
+        ])
         # print('coords:')
         # print(coords)
         atoms = [atom for atom in mol.GetAtoms()]
         mass = Descriptors.MolWt(mol)
         # print('mass:', mass)
-        centre_of_mass = np.array(np.sum(atoms[i].GetMass() * coords[i] for i in range(numatoms))) / mass
+        centre_of_mass = np.array(
+            np.sum(
+                atoms[i].GetMass() * coords[i] for i in range(numatoms)
+            )
+        ) / mass
         # print(centre_of_mass)
         coms.append(centre_of_mass)
 
@@ -167,7 +187,8 @@ def smiles2conformers(smiles, N=10, optimize=True):
 
     Keyword Arguments:
         smiles (str) - smiles string for molecule
-        N (int) - number of conformers to generate using the ETKDG algorithm
+        N (int) - number of conformers to generate using the ETKDG
+            algorithm
         optimize (bool) - flag for UFF optimization (default=True)
 
     Returns:
