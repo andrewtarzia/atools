@@ -53,7 +53,11 @@ def imply_nonporous(Mol):
     minD_C = min(distances[0])
     # check min distance from pore OPT COM to a cage atom
     PCOM = np.array([analysis['pore_diameter_opt']['centre_of_mass']])
-    Pdistances = scpy_dist.cdist(XA=PCOM, XB=coords, metric='euclidean')
+    Pdistances = scpy_dist.cdist(
+        XA=PCOM,
+        XB=coords,
+        metric='euclidean'
+    )
     minD_P = min(Pdistances[0])
     if minD_C < 2 and minD_P < 2:
         logging.info(f'> minD_C {minD_C}, minD_P {minD_P}')
@@ -70,8 +74,7 @@ def imply_nonporous(Mol):
 
 def check_PDB_for_pore(file, diam=0.25):
     """
-    Check PDB for at least one molecule with a pore with a pore_diameter_opt
-    > diam using pyWindow.
+    Check PDB for at least one molecule with a pore > diam.
 
     Parameters
     ----------
@@ -79,12 +82,14 @@ def check_PDB_for_pore(file, diam=0.25):
         PDB to read structure from.
 
     diam : :class:`float`
-        Minimum pore_diameter_opt to use to define pore. Defaults to 0.25 Angstrom.
+        Minimum pore_diameter_opt to use to define pore.
+        Defaults to 0.25 Angstrom.
 
     Returns
     -------
     :class:`bool`
-        True if at least one molecule in PDB has pore_diameter_opt > diam
+        True if at least one molecule in PDB has pore_diameter_opt >
+        diam.
 
     """
     rebuilt_structure = modularize(file=file)
@@ -99,14 +104,16 @@ def check_PDB_for_pore(file, diam=0.25):
                 # found at least one - returning
                 return True
         except ValueError:
-            logging.warning(f'{file}_{molecule} failed pywindow full_analysis.')
+            logging.warning(
+                f'{file}_{molecule} failed pywindow full_analysis.'
+            )
     # if none found, return False
     return False
 
 
 def rebuild(file, overwrite=False):
     """
-    As per example 6 in pywindow - rebuild the PDB system, output and reread.
+    Rebuild the PDB system, output and reread.
 
     """
     out_file = file.replace('.pdb', '_rebuild.pdb')
@@ -126,18 +133,21 @@ def rebuild(file, overwrite=False):
 
 def modularize(file):
     """
-    Rebuild pyWindow MolecularSystem from file and modularize into discrete molecules.
+    Rebuild pyWindow MolecularSystem from file and modularize.
 
     """
     rebuilt_structure = rebuild(file=file)
     if len(rebuilt_structure.system['coordinates']) == 0:
-        logging.warning(f'{file} failed rebuild using pyWindow, return None')
+        logging.warning(
+            f'{file} failed rebuild using pyWindow, return None'
+        )
         return None
     rebuilt_structure.make_modular()
     return rebuilt_structure
 
 
-def analyze_cage(cage, propfile=None, structfile=None, include_coms=True):
+def analyze_cage(cage, propfile=None, structfile=None,
+                 include_coms=True):
     """
     Analyze cage already loaded into pywindow.
 
@@ -151,7 +161,8 @@ def analyze_cage(cage, propfile=None, structfile=None, include_coms=True):
         cage.dump_molecule(structfile, include_coms=include_coms)
 
 
-def analyze_cage_from_MOL(file, prop_file, mole_file, include_coms=True):
+def analyze_cage_from_MOL(file, prop_file, mole_file,
+                          include_coms=True):
     """
     Run all desired analysis on a single built cage molecule.
 
@@ -173,16 +184,16 @@ def analyze_rebuilt(rebuilt_structure, file_prefix, atom_limit,
         (modified version of Example6 of pywindow examples.)
 
     Keyword Arguments:
-        rebuilt_structure (Molecule) - Pywindow rebuilt unitcell with cage
-            molecules
+        rebuilt_structure (Molecule) - Pywindow rebuilt unitcell with
+            cage molecules
         file_prefix (str) - file naming convention
         atom_limit (int) - number of atoms used as cutoff for analysis
         include_coms (bool) - whether output PDB includes window COMs
         verbose (bool) - [Default = False]
 
     Returns:
-        result_dict (dictionary) - dictionary of window information for all
-            cages
+        result_dict (dictionary) - dictionary of window information
+            for all cages
 
     """
     result_dict = {}
@@ -195,7 +206,10 @@ def analyze_rebuilt(rebuilt_structure, file_prefix, atom_limit,
         try:
             analysis = mol.full_analysis()
         except ValueError:
-            logging.warning(f'{file_prefix}_{molecule} failed pywindow full_analysis.')
+            logging.warning(
+                f'{file_prefix}_{molecule} failed pywindow '
+                'full_analysis.'
+            )
             continue
         if verbose:
             print(analysis, '\n')
@@ -208,9 +222,11 @@ def analyze_rebuilt(rebuilt_structure, file_prefix, atom_limit,
             file_prefix + "_{0}.json".format(molecule),
             override=True)
         # output COM, window size and COM, and COM of pore optimized
-        result_dict[molecule] = (analysis['centre_of_mass'],
-                                 analysis['windows'],
-                                 analysis['pore_diameter_opt']['centre_of_mass'])
+        result_dict[molecule] = (
+            analysis['centre_of_mass'],
+            analysis['windows'],
+            analysis['pore_diameter_opt']['centre_of_mass']
+        )
     # print(result_dict)
     print('analysis done.')
     return result_dict
@@ -244,19 +260,25 @@ def is_solvent(molecule):
     else:
         no_windows = 0
     if pd_opt > 0.0 and no_windows >= 2:
-        logging.info(f'not solvent with pore diam: {pd_opt} and {no_windows} windows')
+        logging.info(
+            f'not solvent with pore diam: {pd_opt} and '
+            f' {no_windows} windows'
+        )
         result = False
     return result
 
 
 def remove_solvent(pw_struct, ASE_struct, mol_list):
     """
-    Remove solvents based on is_solvent() function and append to ASE_struct
+    Remove solvents and write desolvated structure to ASE_struct.
 
     Keyword Arguments:
-        pw_struct (pyWindow Rebuilt Molecule) - structure to analyze molecules of
-        ASE_struct (ASE.Atoms()) - structure to append non-solvent atoms to
-        mol_list (list) - list of distinct molecules from pyWindow modularize
+        pw_struct (pyWindow Rebuilt Molecule) -
+            structure to analyze molecules of
+        ASE_struct (ASE.Atoms()) -
+            structure to append non-solvent atoms to
+        mol_list (list) -
+            list of distinct molecules from pyWindow modularize
 
     Returns:
         ASE_struct_out (ASE.Atoms()) - structure with non-solvent atoms
@@ -265,10 +287,15 @@ def remove_solvent(pw_struct, ASE_struct, mol_list):
     # make deep copy of ASE_struct
     ASE_struct_out = copy.deepcopy(ASE_struct)
     for molecule in pw_struct.molecules:
-        logging.info(f'Analysing molecule {molecule + 1} out of {len(pw_struct.molecules)}')
+        logging.info(
+            f'Analysing molecule {molecule + 1} out of '
+            f'{len(pw_struct.molecules)}'
+        )
         mol = pw_struct.molecules[molecule]
         if is_solvent(molecule=mol) is False:
-            logging.info(f'is NOT solvent with {mol.no_of_atoms} atoms')
+            logging.info(
+                f'is NOT solvent with {mol.no_of_atoms} atoms'
+            )
             # append atoms to ASE_struct_out
             atom_ids = np.arange(1, mol.no_of_atoms + 1)
             coords = mol.coordinates
@@ -283,8 +310,7 @@ def remove_solvent(pw_struct, ASE_struct, mol_list):
 
 def append_and_write_COMs(result_dict, structure, file, suffix='.cif'):
     """
-    Append all COMs in result dict as the atoms below to the ASE structure
-    and output to file.
+    Append all COMs in result dict to the ASE structure.
 
     Window COMs: He
     cage COM: Ne
