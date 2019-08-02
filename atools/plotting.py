@@ -97,14 +97,16 @@ def flat_line(ax, x, y, w=0, C='k', m='x'):
     ax.scatter(x, y, marker=m, c=C)
 
 
-def shiftedColorMap(cmap, start=0, midpoint=0.5, stop=1.0, name='shiftedcmap'):
+def shiftedColorMap(cmap, start=0, midpoint=0.5, stop=1.0,
+                    name='shiftedcmap'):
     """
     Function to offset the "center" of a colormap. Useful for
     data with a negative min and positive max and you want the
     middle of the colormap's dynamic range to be at zero
 
     From Stack Exchange:
-        https://stackoverflow.com/questions/7404116/defining-the-midpoint-of-a-colormap-in-matplotlib
+        https://stackoverflow.com/questions/7404116/
+        defining-the-midpoint-of-a-colormap-in-matplotlib
 
     Input
     -----
@@ -147,12 +149,17 @@ def shiftedColorMap(cmap, start=0, midpoint=0.5, stop=1.0, name='shiftedcmap'):
     return newcmap
 
 
-def define_plot_cmap(fig, ax, mid_point, cmap, ticks, labels, cmap_label):
+def define_plot_cmap(fig, ax, mid_point, cmap, ticks, labels,
+                     cmap_label):
     """
     Define cmap shifted to midpoint and plot colourbar
 
     """
-    new_cmap = shiftedColorMap(cmap, midpoint=mid_point, name='shifted')
+    new_cmap = shiftedColorMap(
+        cmap,
+        midpoint=mid_point,
+        name='shifted'
+    )
     X = np.linspace(0, 1, 256)
     cax = ax.scatter(-X-100, -X-100, c=X, cmap=new_cmap)
     cbar = fig.colorbar(cax, ticks=ticks, spacing='proportional')
