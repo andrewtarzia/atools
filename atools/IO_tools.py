@@ -14,6 +14,20 @@ from stk import StructUnit, OPTIONS
 from ase.io import read
 from ase.io.xyz import write_xyz
 from pymatgen.io.cif import CifParser
+import re
+
+
+def replace(string, substitutions):
+    """
+    Replace multiple substrings
+
+    """
+
+    substrings = sorted(substitutions, key=len, reverse=True)
+    regex = re.compile('|'.join(map(re.escape, substrings)))
+    return regex.sub(
+        lambda match: substitutions[match.group(0)], string
+    )
 
 
 def convert_MOL3000_2_PDB_XYZ(file):
