@@ -42,9 +42,11 @@ def draw_mol_to_svg(mol, filename):
     # (https://sourceforge.net/p/rdkit/mailman/message/31637105/)
     o = DrawingOptions()
     o.bgColor = None
-    Chem.Compute2DCoords(mol)
+    # Use copy of molecule to avoid changing instance of mol.
+    new_mol = Chem.MolFromMolBlock(Chem.MolToMolBlock(mol))
+    Chem.Compute2DCoords(new_mol)
     Draw.MolToFile(
-        mol, filename, fitImage=True, imageType='svg', options=o
+        new_mol, filename, fitImage=True, imageType='svg', options=o
     )
 
 
