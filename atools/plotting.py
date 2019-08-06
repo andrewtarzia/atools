@@ -21,7 +21,7 @@ def colors_i_like():
 
     """
     return [
-        '#FA7268', '#F8A72A', '#D15472', '#50A2A6', '#6BADB0',
+        '#FA7268', '#F8A72A', '#DAF7A6', '#900C3F', '#6BADB0',
         '#DB869D', '#F6D973'
     ]
 
