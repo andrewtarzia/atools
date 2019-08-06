@@ -370,7 +370,7 @@ def optimize_structunit(infile, outfile, exec,
         struct.write(outfile)
         logging.info('done')
     else:
-        logging.info(f'{method} is implemented yet.')
+        logging.info(f'{method} is not implemented yet.')
         sys.exit('exitting')
 
 
