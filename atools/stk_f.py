@@ -189,20 +189,39 @@ def topo_2_property(topology, property):
     return dict[topology][property]
 
 
-def is_collapse(topo, avg_diff, max_window_diam, cavity_size,
-                no_window):
-    expected_wind = topo_2_property(topo, property='expected_wind')
-    if expected_wind == no_window:
-        alpha = 4 * avg_diff / (max_window_diam * expected_wind)
-        if alpha < 0.035 and cavity_size > 1:
-            # not collapsed
-            return False
-        else:
-            # unknown
-            return None
-    else:
-        # collapsed
+def is_porous(pore_diameter, max_window_diameter):
+    """
+    Returns True if a cage is deemed to be porous.
+
+    A porous cage is defined as having:
+        (Computationally-inspired discovery of an unsymmetrical
+        porous organic cage)
+        1 - p_diam_opt > 3.4
+        2 - max window_diameter > 2.8
+
+    """
+    if max_window_diameter > 2.8 and pore_diameter > 3.4:
         return True
+    else:
+        return False
+
+
+def is_collapsed(topo, pore_diameter, no_window):
+    """
+    Returns True if a cage is deemed to be collapsed.
+
+    A collapsed cage is defined as having:
+        - pore_diam_opt < 2.8 Angstrom (H2 kinetic diameter)
+        - number of windows != expected number based on topology.
+
+    """
+    expected_wind = topo_2_property(topo, property='expected_wind')
+    if expected_wind != no_window:
+        return True
+    elif pore_diameter < 2.8:
+        return True
+    else:
+        return False
 
 
 def load_StructUnitX(file, X=0):
