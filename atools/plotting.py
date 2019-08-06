@@ -15,6 +15,17 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 
 
+def colors_i_like():
+    """
+    A list of colours I like to choose from.
+
+    """
+    return [
+        '#FA7268', '#F8A72A', '#D15472', '#50A2A6', '#6BADB0',
+        '#DB869D', '#F6D973'
+    ]
+
+
 def parity_plot(X, Y, xtitle, ytitle, lim):
     """
     Make parity plot.
