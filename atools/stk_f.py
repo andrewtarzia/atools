@@ -130,58 +130,58 @@ def topo_2_property(topology, property):
         sys.exit('exitting.')
 
     dict = {
-        '2p3':
-        {'stk_func': stk.TwoPlusThree(),
-         'stoich': (2, 3),
-         'noimines': 6,
-         'expected_wind': 3,
-         },
-        '4p6':
-        {'stk_func': stk.FourPlusSix(),
-         'stoich': (4, 6),
-         'noimines': 12,
-         'expected_wind': 4,
-         },
-        '4p62':
-        {'stk_func': stk.FourPlusSix2(),
-         'stoich': (4, 6),
-         'noimines': 12,
-         'expected_wind': 4,
-         },
-        '6p9':
-        {'stk_func': stk.SixPlusNine(),
-         'stoich': (6, 9),
-         'noimines': 18,
-         'expected_wind': 5,
-         },
-        'dodec':
-        {'stk_func': stk.Dodecahedron(),
-         'stoich': (20, 30),
-         'noimines': 60,
-         'expected_wind': 12,
-         },
-        '8p12':
-        {'stk_func': stk.EightPlusTwelve(),
-         'stoich': (8, 12),
-         'noimines': 24,
-         'expected_wind': 6,
-         },
-        '1p1':
-        {'stk_func': stk.OnePlusOne(
-            # place bb1 on vertex (0), bb2 on vertex (1)
-            bb_positions={0: [0], 1: [1]}),
-         'stoich': (1, 1),
-         'noimines': 3,
-         'expected_wind': 3,
-         },
-        '4p4':
-        {'stk_func': stk.FourPlusFour(
-            # place bb1 on vertex (0, 2), bb2 on vertex (1, 3)
-            bb_positions={0: [0, 3, 5, 6], 1: [1, 2, 4, 7]}),
-         'stoich': (4, 4),
-         'noimines': 12,
-         'expected_wind': 6,
-         },
+        '2p3': {
+            'stk_func': stk.TwoPlusThree(),
+            'stoich': (2, 3),
+            'noimines': 6,
+            'expected_wind': 3,
+        },
+        '4p6': {
+            'stk_func': stk.FourPlusSix(),
+            'stoich': (4, 6),
+            'noimines': 12,
+            'expected_wind': 4,
+        },
+        '4p62': {
+            'stk_func': stk.FourPlusSix2(),
+            'stoich': (4, 6),
+            'noimines': 12,
+            'expected_wind': 4,
+        },
+        '6p9': {
+            'stk_func': stk.SixPlusNine(),
+            'stoich': (6, 9),
+            'noimines': 18,
+            'expected_wind': 5,
+        },
+        'dodec': {
+            'stk_func': stk.Dodecahedron(),
+            'stoich': (20, 30),
+            'noimines': 60,
+            'expected_wind': 12,
+        },
+        '8p12': {
+            'stk_func': stk.EightPlusTwelve(),
+            'stoich': (8, 12),
+            'noimines': 24,
+            'expected_wind': 6,
+        },
+        '1p1': {
+            'stk_func': stk.OnePlusOne(
+                # place bb1 on vertex (0), bb2 on vertex (1)
+                bb_positions={0: [0], 1: [1]}),
+            'stoich': (1, 1),
+            'noimines': 3,
+            'expected_wind': 3,
+        },
+        '4p4': {
+            'stk_func': stk.FourPlusFour(
+                # place bb1 on vertex (0, 2), bb2 on vertex (1, 3)
+                bb_positions={0: [0, 3, 5, 6], 1: [1, 2, 4, 7]}),
+            'stoich': (4, 4),
+            'noimines': 12,
+            'expected_wind': 6,
+        },
     }
     if topology not in dict:
         logging.info(f'properties not defined for {topology}')
