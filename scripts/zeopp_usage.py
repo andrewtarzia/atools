@@ -18,7 +18,15 @@ from glob import glob
 def main():
     if (not len(sys.argv) == 4):
         print("""
-Usage: zeopp_usage.py script CIF
+Usage: zeopp_usage.py job CIF
+
+    job (str) : target job to be run.
+    structure (str) : input structure to run job on.
+        (include '*' if to be run on pattern.) See Zeo++ manual for
+        possible structures.
+
+    Available jobs:
+        - zsa_n2: runs surface area analysis (-ha -sa)
 
     """)
         sys.exit()
