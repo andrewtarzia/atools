@@ -77,22 +77,34 @@ def scatter_plot(X, Y, xtitle, ytitle, xlim, ylim, title=None,
     return fig, ax
 
 
-def histogram_plot_1(Y, X_range, width, alpha, color, edgecolor,
-                     xtitle, density=False):
+def histogram_plot_N(Y, X_range, width, alpha, color, edgecolor,
+                     xtitle, labels=None, density=False, N=1):
     """
     Make histogram plot with 1 distribution.
 
     """
 
+    if labels is None:
+        labels = [None] * N
+
     fig, ax = plt.subplots(figsize=(8, 5))
     X_bins = np.arange(X_range[0], X_range[1], width)
-    hist, bin_edges = np.histogram(a=Y, bins=X_bins, density=density)
-    ax.bar(bin_edges[:-1],
-           hist,
-           align='edge',
-           alpha=alpha, width=width,
-           color=color,
-           edgecolor=edgecolor)
+    for I in range(N):
+        hist, bin_edges = np.histogram(
+            a=Y[I],
+            bins=X_bins,
+            density=density
+        )
+        ax.bar(
+            bin_edges[:-1],
+            hist,
+            align='edge',
+            alpha=alpha,
+            width=width,
+            color=color[I],
+            edgecolor=edgecolor,
+            label=labels[I]
+        )
     ax.tick_params(axis='both', which='major', labelsize=16)
     ax.set_xlabel(xtitle, fontsize=16)
     if density is False:
@@ -100,6 +112,8 @@ def histogram_plot_1(Y, X_range, width, alpha, color, edgecolor,
     elif density is True:
         ax.set_ylabel('frequency', fontsize=16)
     ax.set_xlim(X_range)
+    if N > 1 and labels[0] is not None:
+        ax.legend(fontsize=16)
     return fig, ax
 
 
