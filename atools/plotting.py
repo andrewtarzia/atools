@@ -26,14 +26,22 @@ def colors_i_like():
     ]
 
 
-def parity_plot(X, Y, xtitle, ytitle, lim):
+def parity_plot(X, Y, xtitle, ytitle, lim, c=None, marker=None):
     """
     Make parity plot.
 
     """
+    if c is None:
+        C = colors_i_like()[2]
+    else:
+        C = c
+    if marker is None:
+        M = 'o'
+    else:
+        M = marker
     fig, ax = plt.subplots(figsize=(5, 5))
-    ax.scatter(X, Y, c='firebrick', edgecolors='k',
-               marker='o', alpha=1.0, s=80)
+    ax.scatter(X, Y, c=C, edgecolors='k',
+               marker=M, alpha=1.0, s=80)
     ax.plot(np.linspace(min(lim) - 1, max(lim) + 1, 2),
             np.linspace(min(lim) - 1, max(lim) + 1, 2),
             c='k', alpha=0.4)
