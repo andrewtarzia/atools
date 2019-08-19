@@ -32,15 +32,18 @@ def build_ABCBA(core, liga, link, flippedlink=False):
         polymer (stk.Polymer()) - polymer molecule pre optimization
 
     """
-    ###### MODIFICATION HERE ######
     if flippedlink is False:
         orientation = [0, 0, 0, 1, 1]
     elif flippedlink is True:
         orientation = [0, 1, 0, 0, 1]
-    polymer = stk.Polymer([liga, link, core],
-                          stk.Linear(repeating_unit='ABCBA',
-                                     orientation=orientation,
-                                     n=1, ends='fg'))
+    polymer = stk.Polymer(
+        [liga, link, core],
+        stk.Linear(
+            repeating_unit='ABCBA',
+            orientation=orientation,
+            n=1, ends='fg'
+        )
+    )
     return polymer
 
 
@@ -57,11 +60,14 @@ def build_ABA(core, liga):
         polymer (stk.Polymer()) - polymer molecule pre optimization
 
     """
-    ###### MODIFICATION HERE ######
-    polymer = stk.Polymer([liga, core],
-                          stk.Linear(repeating_unit='ACA',
-                                     orientation=[0, 0, 1],
-                                     n=1, ends='fg'))
+    polymer = stk.Polymer(
+        [liga, core],
+        stk.Linear(
+            repeating_unit='ACA',
+            orientation=[0, 0, 1],
+            n=1, ends='fg'
+        )
+    )
     return polymer
 
 
@@ -80,7 +86,6 @@ def build_population(directory, structunit, fgs=None, suffix='.mol'):
         popn (stk.Population()) - population of molecules
 
     """
-    ###### MODIFICATION HERE ######
     if fgs is None:
         fgs = ['bromine']
 
