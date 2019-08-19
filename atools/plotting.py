@@ -92,14 +92,11 @@ def histogram_plot_N(Y, X_range, width, alpha, color, edgecolor,
 
     """
 
-    if labels is None:
-        labels = [None] * N
-
     fig, ax = plt.subplots(figsize=(8, 5))
     X_bins = np.arange(X_range[0], X_range[1], width)
-    for I in range(N):
+    if N == 1:
         hist, bin_edges = np.histogram(
-            a=Y[I],
+            a=Y,
             bins=X_bins,
             density=density
         )
@@ -109,10 +106,34 @@ def histogram_plot_N(Y, X_range, width, alpha, color, edgecolor,
             align='edge',
             alpha=alpha,
             width=width,
-            color=color[I],
-            edgecolor=edgecolor,
-            label=labels[I]
+            color=color,
+            edgecolor=edgecolor
         )
+    else:
+        for I in range(N):
+            if type(color) is not list or len(Y) != N:
+                raise ValueError(
+                    'Make sure color and Y are of length N'
+                )
+            hist, bin_edges = np.histogram(
+                a=Y[I],
+                bins=X_bins,
+                density=density
+            )
+            if labels[I] is None:
+                label = ''
+            else:
+                label = labels[I]
+            ax.bar(
+                bin_edges[:-1],
+                hist,
+                align='edge',
+                alpha=alpha,
+                width=width,
+                color=colors[I],
+                edgecolor=edgecolor,
+                label=label
+            )
     ax.tick_params(axis='both', which='major', labelsize=16)
     ax.set_xlabel(xtitle, fontsize=16)
     if density is False:
