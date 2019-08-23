@@ -26,6 +26,16 @@ def colors_i_like():
     ]
 
 
+def markers_i_like():
+    """
+    A list of markers I like to choose from.
+
+    """
+    return [
+        'o', 'X', 's', 'P', 'h', 'D', 'd', 'p', 'v', '^', '<', '>'
+    ]
+
+
 def parity_plot(X, Y, xtitle, ytitle, lim, c=None, marker=None):
     """
     Make parity plot.
