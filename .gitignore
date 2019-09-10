@@ -47,6 +47,11 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 
+# Some folders get created by tests.
+**/*tests_output
+docs/build
+tests/failures.txt
+
 # Translations
 *.mo
 *.pot
