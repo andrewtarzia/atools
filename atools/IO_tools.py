@@ -10,7 +10,7 @@ Author: Andrew Tarzia
 Date Created: 15 Mar 2019
 """
 from os.path import isfile
-from stk import StructUnit, OPTIONS
+from stk import BuildingBlock
 from ase.io import read
 from ase.io.xyz import write_xyz
 from pymatgen.io.cif import CifParser
@@ -35,12 +35,12 @@ def convert_MOL3000_2_PDB_XYZ(file):
     Convert MOL from stk to PDB and XYZ file. Return None.
 
     """
-    OPTIONS['cache'] = False  # turn caching off for loading
+    # Turn caching off for loading.
     pdbfile = file.replace('.mol', '.pdb')
-    # read in mol into stk
-    struct = StructUnit(file)
+    # Read mol into stk.
+    struct = BuildingBlock.init_from_file(path=file, use_cache=False)
     struct.write(pdbfile)
-    # read pdb into ASE
+    # Read pdb into ASE and save as XYZ.
     convert_PDB_2_XYZ(file=pdbfile)
 
 
