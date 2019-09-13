@@ -124,7 +124,8 @@ def build_population(directory, fgs=None, suffix='.mol'):
 
 
 def topo_2_property(topology, property):
-    """Returns properties of a topology for a given topology name.
+    """
+    Returns properties of a topology for a given topology name.
 
     Properties:
         'stk_func' - gives the stk topology function for building cages
@@ -148,53 +149,53 @@ def topo_2_property(topology, property):
 
     dict = {
         '2p3': {
-            'stk_func': stk.TwoPlusThree(),
+            'stk_func': stk.cage.TwoPlusThree(),
             'stoich': (2, 3),
             'noimines': 6,
             'expected_wind': 3,
         },
         '4p6': {
-            'stk_func': stk.FourPlusSix(),
+            'stk_func': stk.cage.FourPlusSix(),
             'stoich': (4, 6),
             'noimines': 12,
             'expected_wind': 4,
         },
         '4p62': {
-            'stk_func': stk.FourPlusSix2(),
+            'stk_func': stk.cage.FourPlusSix2(),
             'stoich': (4, 6),
             'noimines': 12,
             'expected_wind': 4,
         },
         '6p9': {
-            'stk_func': stk.SixPlusNine(),
+            'stk_func': stk.cage.SixPlusNine(),
             'stoich': (6, 9),
             'noimines': 18,
             'expected_wind': 5,
         },
-        'dodec': {
-            'stk_func': stk.Dodecahedron(),
-            'stoich': (20, 30),
-            'noimines': 60,
-            'expected_wind': 12,
-        },
         '8p12': {
-            'stk_func': stk.EightPlusTwelve(),
+            'stk_func': stk.cage.EightPlusTwelve(),
             'stoich': (8, 12),
             'noimines': 24,
             'expected_wind': 6,
         },
+        'dodec': {
+            'stk_func': stk.cage.TwentyPlusThirty(),
+            'stoich': (20, 30),
+            'noimines': 60,
+            'expected_wind': 12,
+        },
         '1p1': {
-            'stk_func': stk.OnePlusOne(
-                # place bb1 on vertex (0), bb2 on vertex (1)
-                bb_positions={0: [0], 1: [1]}),
+            'stk_func': stk.cage.OnePlusOne(),
+            # BB placements used in amarsh project.
+            'bb_positions': {0: [0], 1: [1]},
             'stoich': (1, 1),
             'noimines': 3,
             'expected_wind': 3,
         },
         '4p4': {
-            'stk_func': stk.FourPlusFour(
-                # place bb1 on vertex (0, 2), bb2 on vertex (1, 3)
-                bb_positions={0: [0, 3, 5, 6], 1: [1, 2, 4, 7]}),
+            'stk_func': stk.cage.FourPlusFour(),
+            # BB placements used in amarsh project.
+            'bb_positions': {0: [0, 3, 5, 6], 1: [1, 2, 4, 7]},
             'stoich': (4, 4),
             'noimines': 12,
             'expected_wind': 6,
@@ -239,34 +240,6 @@ def is_collapsed(topo, pore_diameter, no_window):
         return True
     else:
         return False
-
-
-def load_StructUnitX(file, X=0):
-    """
-    Load StructUnitX class with the cache turned off to avoid
-    misreading of file.
-
-    Keyword Arguments:
-        file (str) - file to load in
-        X (int) - order of struct unit to load. Defaults to 0
-
-    X = 0 -> stk.StructUnit
-    X = 2 -> stk.StructUnit2
-    X = 3 -> stk.StructUnit3
-
-    """
-    stk.OPTIONS['cache'] = False  # turn caching off for loading
-    if X == 0:
-        struct = stk.StructUnit(file)
-    elif X == 2:
-        struct = stk.StructUnit2(file)
-    elif X == 3:
-        struct = stk.StructUnit3(file)
-    else:
-        logging.info('X must be 0, 2 or 3')
-        sys.exit('exitting')
-    stk.OPTIONS['cache'] = True  # turn caching back on
-    return struct
 
 
 def default_stk_MD_settings():
@@ -340,7 +313,7 @@ def optimize_structunit(infile, outfile, exec,
 
     """
     logging.info(f'loading in: {infile}')
-    struct = load_StructUnitX(infile, X=0)
+    struct = stk.BuildingBlock.init_from_file(infile)
     if method == 'OPLS':
         # Use standard settings applied in andrew_marsh work if
         # md/settings is None.
@@ -419,7 +392,7 @@ def build_and_opt_cage(prefix, BB1, BB2, topology, macromod_,
         output_dir = Settings['output_dir']
 
     # try:
-    cage = stk.Cage([BB1, BB2], topology)
+    cage = stk.ConstructedMolecule([BB1, BB2], topology)
     cage.write(prefix + '.mol')
     cage.dump(prefix + '.json')
     # restricted=True optimization with OPLS forcefield by default
@@ -452,9 +425,6 @@ def build_and_opt_cage(prefix, BB1, BB2, topology, macromod_,
     if pdb is True:
         cage.write(prefix + '_opt.pdb')
     return cage
-    # except MacroMoleculeBuildError:
-    #     print('build failed')
-    #     pass
 
 
 def update_from_rdkit_conf(struct, mol, conf_id):
