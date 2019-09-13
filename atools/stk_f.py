@@ -3,7 +3,7 @@
 # Distributed under the terms of the MIT License.
 
 """
-Functions that are useful for stk usage
+Functions that are useful for stk usage.
 
 Author: Andrew Tarzia
 
@@ -14,7 +14,6 @@ from glob import glob
 import stk
 import logging
 import sys
-import json
 
 
 def build_ABCBA(core, liga, link, flippedlink=False):
@@ -380,83 +379,6 @@ def optimize_structunit(infile, outfile, exec,
     else:
         logging.info(f'{method} is not implemented yet.')
         sys.exit('exitting')
-
-
-def get_OPLS3_energy_of_list(out_file, structures, macromod_,
-                             dir='', opt=False, settings=None):
-    """Get OPLS3 single point energy of a list of structures.
-
-    Keyword Arguments:
-        file (str) - file that tracks the structures done to avoid
-            redoing
-        structures (list) - list of structure files
-        dir (str) - directory where structures are if not in working
-            dir
-        opt (bool) - True if optimization is required using macromodel
-        settings (dict) - settings for MacroModel Opt/MD
-    """
-    # use standard settings applied in andrew_marsh work if md/settings
-    # is None
-    if settings is None:
-        Settings = default_stk_MD_settings()
-    else:
-        Settings = settings
-    with open(out_file, 'r') as f:
-        calculated = json.load(f)
-    energies = {}
-    for file in structures:
-        logging.info(f'file: {file}')
-        NAME = file.replace(dir, '').replace('.mol', '')
-        # optimize
-        if NAME not in calculated and opt is True:
-            struct = load_StructUnitX(file, X=0)
-            logging.info('doing opt')
-            # restricted=True optimization with OPLS forcefield by
-            # default
-            ff = stk.MacroModelForceField(
-                macromodel_path=exec,
-                restricted=True
-            )
-            # MD process - run MD, collect N conformers, optimize each,
-            # return lowest energy conformer
-            md = stk.MacroModelMD(
-                macromodel_path=exec,
-                output_dir=Settings['output_dir'],
-                timeout=Settings['timeout'],
-                force_field=Settings['force_field'],
-                temperature=Settings['temperature'],
-                conformers=Settings['conformers'],
-                time_step=Settings['time_step'],
-                eq_time=Settings['eq_time'],
-                simulation_time=Settings['simulation_time'],
-                maximum_iterations=Settings['maximum_iterations'],
-                minimum_gradient=Settings['minimum_gradient'],
-                use_cache=Settings['use_cache']
-            )
-            macromodel = stk.OptimizerSequence(ff, md)
-            macromodel.optimize(mol=struct)
-            # get energy
-            struct.energy.macromodel(16, macromod_)
-            for i in struct.energy.values:
-                energies[NAME] = struct.energy.values[i]
-                calculated[NAME] = struct.energy.values[i]
-        elif NAME not in calculated and opt is False:
-            logging.info('extracting energy')
-            try:
-                struct = load_StructUnitX(file, X=0)
-            except TypeError:
-                struct = load_StructUnitX(file + '_opt.mol', X=0)
-            struct.energy.macromodel(16, macromod_)
-            for i in struct.energy.values:
-                energies[NAME] = struct.energy.values[i]
-                calculated[NAME] = struct.energy.values[i]
-        else:
-            logging.info('already calculated')
-            energies[NAME] = calculated[NAME]
-    # save energies of calculated precursors to avoid recalculation
-    with open(out_file, 'w') as f:
-        json.dump(calculated, f)
-    return energies
 
 
 def build_and_opt_cage(prefix, BB1, BB2, topology, macromod_,
