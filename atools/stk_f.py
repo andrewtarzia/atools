@@ -20,27 +20,37 @@ def build_ABCBA(core, liga, link, flippedlink=False):
     """
     Build ABCBA ligand using linear stk polymer.
 
-    Keyword Arguments:
-        core (stk.StructUnit) - molecule to use as core
-        liga (stk.StructUnit) - molecule to use as liga
-        link (stk.StructUnit) - molecule to use as link
-        flippedlink (bool) - whether to flip the linker molecule
-            (default False)
+    Polymer structure:
+        ligand -- linker -- core -- linker -- ligand
 
-    Returns:
-        polymer (stk.Polymer()) - polymer molecule pre optimization
+    Parameters
+    ----------
+    core : :class:`stk.BuildingBlock`
+        The molecule to use as core.
+    liga : :class:`stk.BuildingBlock`
+        The molecule to use as ligand.
+    link : :class:`stk.BuildingBlock`
+        The molecule to use as linker.
+    flippedlink : :class:`bool`
+        `True` to flip the linker molecules. Defaults to `False`.
+
+    Returns
+    -------
+    polymer : :class:`stk.ConstructedMolecule`
+        Built molecule pre optimisation.
 
     """
     if flippedlink is False:
-        orientation = [0, 0, 0, 1, 1]
+        orientation = (0, 0, 0, 1, 1)
     elif flippedlink is True:
-        orientation = [0, 1, 0, 0, 1]
-    polymer = stk.Polymer(
-        [liga, link, core],
-        stk.Linear(
+        orientation = (0, 1, 0, 0, 1)
+    polymer = stk.ConstructedMolecule(
+        building_blocks=[liga, link, core],
+        topology_graph=stk.polymer.Linear(
             repeating_unit='ABCBA',
-            orientation=orientation,
-            n=1, ends='fg'
+            num_repeating_units=1,
+            orientations=orientation,
+            num_processes=1
         )
     )
     return polymer
@@ -48,23 +58,31 @@ def build_ABCBA(core, liga, link, flippedlink=False):
 
 def build_ABA(core, liga):
     """
-    Build ABCBA ligand using linear stk polymer.
+    Build ABA ligand using linear stk polymer.
 
-    Keyword Arguments:
-        core (stk.StructUnit) - molecule to use as core
-        liga (stk.StructUnit) - molecule to use as liga
-        link (stk.StructUnit) - molecule to use as link
+    Polymer structure:
+        ligand -- core -- ligand
 
-    Returns:
-        polymer (stk.Polymer()) - polymer molecule pre optimization
+    Parameters
+    ----------
+    core : :class:`stk.BuildingBlock`
+        The molecule to use as core.
+    liga : :class:`stk.BuildingBlock`
+        The molecule to use as ligand.
+
+    Returns
+    -------
+    polymer : :class:`stk.ConstructedMolecule`
+        Built molecule pre optimisation.
 
     """
-    polymer = stk.Polymer(
-        [liga, core],
-        stk.Linear(
-            repeating_unit='ACA',
-            orientation=[0, 0, 1],
-            n=1, ends='fg'
+    polymer = stk.ConstructedMolecule(
+        building_blocks=[liga, core],
+        topology_graph=stk.polymer.Linear(
+            repeating_unit='ABA',
+            num_repeating_units=1,
+            orientations=(0, 0, 1),
+            num_processes=1
         )
     )
     return polymer
