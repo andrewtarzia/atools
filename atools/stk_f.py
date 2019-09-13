@@ -455,3 +455,28 @@ def build_and_opt_cage(prefix, BB1, BB2, topology, macromod_,
     # except MacroMoleculeBuildError:
     #     print('build failed')
     #     pass
+
+
+def update_from_rdkit_conf(struct, mol, conf_id):
+    """
+    Update the structure to match `conf_id` of `mol`.
+
+    Parameters
+    ----------
+    struct : :class:`stk.Molecule`
+        The molecule whoce coordinates are to be updated.
+    mol : :class:`rdkit.Mol`
+        The :mod:`rdkit` molecule to use for the structure update.
+    conf_id : :class:`int`
+        The conformer ID of the `mol` to update from.
+
+    Returns
+    -------
+    :class:`.Molecule`
+        The molecule.
+
+    """
+
+    pos_mat = mol.GetConformer(id=conf_id).GetPositions()
+    struct.set_position_matrix(pos_mat)
+    return struct
