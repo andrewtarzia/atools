@@ -58,7 +58,7 @@ def build_ABCBA(core, liga, link, flippedlink=False):
 
 def build_ABA(core, liga):
     """
-    Build ABA ligand using linear stk polymer.
+    Build ABA ligand using linear stk.Polymer().
 
     Polymer structure:
         ligand -- core -- ligand
