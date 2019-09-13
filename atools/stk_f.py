@@ -88,19 +88,23 @@ def build_ABA(core, liga):
     return polymer
 
 
-def build_population(directory, structunit, fgs=None, suffix='.mol'):
+def build_population(directory, fgs=None, suffix='.mol'):
     """
-    Reads all SUFFIX files in directory into an stk population.
+    Build population of BuilingBlocks from directory.
 
-    Keyword Arguments:
-        directory (str) - directory containing molecules
-        structunit (str) - stk.StructUnit/2/3 class to use for molecule
-        fgs (list) - list of functional groups on the molecules.
-            Defaults to Br
-        suffix (str) - file type (default .mol)
+    Parameters
+    ----------
+    directory : :class:`str`
+        Directory containing molecule files.
+    fgs : :class:`list` of :class:`str`
+        Functional groups of BuildingBlocks. Defaults to bromine.
+    suffix : :class:`str`
+        File suffix to use.
 
-    Returns:
-        popn (stk.Population()) - population of molecules
+    Returns
+    -------
+    popn : :class:`stk.Population`
+        Population of BuildingBlocks.
 
     """
     if fgs is None:
@@ -108,24 +112,12 @@ def build_population(directory, structunit, fgs=None, suffix='.mol'):
 
     mols = []
     for file in sorted(glob(directory + '*' + suffix)):
-        if structunit == 'StructUnit':
-            mol = stk.StructUnit(
-                file,
-                fgs,
-                name=file.rstrip(suffix).replace(directory, '')
-            )
-        elif structunit == 'StructUnit2':
-            mol = stk.StructUnit2(
-                file,
-                fgs,
-                name=file.rstrip(suffix).replace(directory, '')
-            )
-        elif structunit == 'StructUnit3':
-            mol = stk.StructUnit3(
-                file,
-                fgs,
-                name=file.rstrip(suffix).replace(directory, '')
-            )
+        mol = stk.BuildingBlock.init_from_file(
+            path=file,
+            functional_groups=fgs,
+            use_cache=False
+        )
+        mol.name = file.rstrip(suffix).replace(directory, '')
         mols.append(mol)
     popn = stk.Population(*mols)
     return popn
