@@ -18,13 +18,13 @@ import sys
 
 def calculate_RMSD(results_part, structure_name, init_structure_dir):
     """
-    Calculate RMSD of GFN output structure compared to initial structure.
+    Calculate RMSD of GFN output structure compared to init structure.
 
     Code from James Pegg.
 
     """
     # read in initial structure
-    initial_structure_file = init_structure_dir + structure_name + '.xyz'
+    initial_structure_file = init_structure_dir+structure_name+'.xyz'
     ref = mda.Universe(initial_structure_file)
     # read in new structure
     new_structure_file = 'xtbopt.xyz'
@@ -41,7 +41,7 @@ def calc_formation_energy(prod, react):
     """
     Calculate formation energy of 'A' in a.u. from 2 lists of energies.
 
-    Reaction formation energy == sum(product energy) - sum(reactant energy)
+    Formation energy = sum(product energy) - sum(reactant energy)
 
     Keyword arguments:
         prod (list) - list of product energies
@@ -64,7 +64,10 @@ def get_formation_energies(data, ff='OPLS'):
     if ff == 'OPLS':
         H2O_energy = 0.0
     else:
-        print('need water energy - need to implement check for this in data')
+        print(
+            'need water energy - need to implement check for this '
+            'in data'
+        )
         sys.exit('exitting')
     form_energies = []
     stoich = {'1p1': {'bb1': 1, 'bb2': 1, 'h2o': 3},
@@ -74,7 +77,9 @@ def get_formation_energies(data, ff='OPLS'):
               '4p62': {'bb1': 4, 'bb2': 6, 'h2o': 12},
               '6p9': {'bb1': 6, 'bb2': 9, 'h2o': 18}}
     for i, row in data.iterrows():
-        FE = (row.cage_ey + stoich[row.topo]['h2o'] * H2O_energy) - (row.bb1_ey * stoich[row.topo]['bb1'] + row.bb2_ey * stoich[row.topo]['bb2'])
+        FE = (row.cage_ey + stoich[row.topo]['h2o'] * H2O_energy)
+        - (row.bb1_ey * stoich[row.topo]['bb1'] +
+           row.bb2_ey * stoich[row.topo]['bb2'])
         form_energies.append(FE)
     return form_energies
 
@@ -83,7 +88,8 @@ def unit_vector(vector):
     """
     Returns the unit vector of the vector.
 
-    https://stackoverflow.com/questions/2827393/angles-between-two-n-dimensional-vectors-in-python/13849249#13849249
+    https://stackoverflow.com/questions/2827393/angles-between
+    -two-n-dimensional-vectors-in-python/13849249#13849249
     """
     return vector / np.linalg.norm(vector)
 
@@ -98,7 +104,8 @@ def angle_between(v1, v2):
             >>> angle_between((1, 0, 0), (-1, 0, 0))
             3.141592653589793
 
-    https://stackoverflow.com/questions/2827393/angles-between-two-n-dimensional-vectors-in-python/13849249#13849249
+    https://stackoverflow.com/questions/2827393/angles-between-
+    two-n-dimensional-vectors-in-python/13849249#13849249
     """
     v1_u = unit_vector(v1)
     v2_u = unit_vector(v2)
@@ -107,11 +114,17 @@ def angle_between(v1, v2):
 
 def get_dihedral(pt1, pt2, pt3, pt4):
     """
-    Calculate the dihedral (-pi to pi) between four points using Praxeolitic formula
-    1 sqrt, 1 cross product
+    Calculate the dihedral between four points.
 
-    From: https://stackoverflow.com/questions/20305272/dihedral-torsion-angle-from-four-points-in-cartesian-coordinates-in-python
+    Uses Praxeolitic formula --> 1 sqrt, 1 cross product
+
+    Output in range (-pi to pi).
+
+    From: https://stackoverflow.com/questions/20305272/
+    dihedral-torsion-angle-from-four-points-in-cartesian-
+    coordinates-in-python
     (new_dihedral(p))
+
     """
     p0 = np.asarray(pt1)
     p1 = np.asarray(pt2)
@@ -139,3 +152,11 @@ def get_dihedral(pt1, pt2, pt3, pt4):
     x = np.dot(v, w)
     y = np.dot(np.cross(b1, v), w)
     return np.degrees(np.arctan2(y, x))
+
+
+def arbitrary_round(x, base):
+    """
+    Round x to nearest base.
+
+    """
+    return base * round(x/base)
