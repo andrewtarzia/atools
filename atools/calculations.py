@@ -18,13 +18,21 @@ import sys
 
 def calculate_RMSD(results_part, structure_name, init_structure_dir):
     """
+<<<<<<< HEAD
     Calculate RMSD of structure compared to initial structure.
+=======
+    Calculate RMSD of GFN output structure compared to init structure.
+>>>>>>> 3b110bffa08dde5da703fabfb45d007713836d42
 
     Code from James Pegg.
 
     """
     # read in initial structure
+<<<<<<< HEAD
     initial_structure_file = init_structure_dir+structure_name + '.xyz'
+=======
+    initial_structure_file = init_structure_dir+structure_name+'.xyz'
+>>>>>>> 3b110bffa08dde5da703fabfb45d007713836d42
     ref = mda.Universe(initial_structure_file)
     # read in new structure
     new_structure_file = 'xtbopt.xyz'
@@ -41,8 +49,12 @@ def calc_formation_energy(prod, react):
     """
     Calculate formation energy of 'A' in a.u. from 2 lists of energies.
 
+<<<<<<< HEAD
     Reaction formation energy ==
         sum(product energy) - sum(reactant energy)
+=======
+    Formation energy = sum(product energy) - sum(reactant energy)
+>>>>>>> 3b110bffa08dde5da703fabfb45d007713836d42
 
     Keyword arguments:
         prod (list) - list of product energies
@@ -66,8 +78,13 @@ def get_formation_energies(data, ff='OPLS'):
         H2O_energy = 0.0
     else:
         print(
+<<<<<<< HEAD
             'need water energy - need to implement check for '
             'this in data'
+=======
+            'need water energy - need to implement check for this '
+            'in data'
+>>>>>>> 3b110bffa08dde5da703fabfb45d007713836d42
         )
         sys.exit('exitting')
     form_energies = []
@@ -79,10 +96,15 @@ def get_formation_energies(data, ff='OPLS'):
               '6p9': {'bb1': 6, 'bb2': 9, 'h2o': 18}}
     for i, row in data.iterrows():
         FE = (row.cage_ey + stoich[row.topo]['h2o'] * H2O_energy)
+<<<<<<< HEAD
         FE = FE - (
             row.bb1_ey * stoich[row.topo]['bb1'] +
             row.bb2_ey * stoich[row.topo]['bb2']
         )
+=======
+        - (row.bb1_ey * stoich[row.topo]['bb1'] +
+           row.bb2_ey * stoich[row.topo]['bb2'])
+>>>>>>> 3b110bffa08dde5da703fabfb45d007713836d42
         form_energies.append(FE)
     return form_energies
 
@@ -91,9 +113,14 @@ def unit_vector(vector):
     """
     Returns the unit vector of the vector.
 
+<<<<<<< HEAD
     https://stackoverflow.com/questions/2827393/
     angles-between-two-n-dimensional-vectors-in-python/
     13849249#13849249
+=======
+    https://stackoverflow.com/questions/2827393/angles-between
+    -two-n-dimensional-vectors-in-python/13849249#13849249
+>>>>>>> 3b110bffa08dde5da703fabfb45d007713836d42
     """
     return vector / np.linalg.norm(vector)
 
@@ -113,6 +140,11 @@ def angle_between(v1, v2):
     angles-between-two-n-dimensional-vectors-in-python/
     13849249#13849249
 
+<<<<<<< HEAD
+=======
+    https://stackoverflow.com/questions/2827393/angles-between-
+    two-n-dimensional-vectors-in-python/13849249#13849249
+>>>>>>> 3b110bffa08dde5da703fabfb45d007713836d42
     """
     v1_u = unit_vector(v1)
     v2_u = unit_vector(v2)
@@ -121,6 +153,7 @@ def angle_between(v1, v2):
 
 def get_dihedral(pt1, pt2, pt3, pt4):
     """
+<<<<<<< HEAD
     Calculate the dihedral (-pi to pi) between four points.
 
     Uses Praxeolitic formula:
@@ -130,7 +163,19 @@ def get_dihedral(pt1, pt2, pt3, pt4):
     dihedral-torsion-angle-from-four-points-in-cartesian-
     coordinates-in-python
 
+=======
+    Calculate the dihedral between four points.
+
+    Uses Praxeolitic formula --> 1 sqrt, 1 cross product
+
+    Output in range (-pi to pi).
+
+    From: https://stackoverflow.com/questions/20305272/
+    dihedral-torsion-angle-from-four-points-in-cartesian-
+    coordinates-in-python
+>>>>>>> 3b110bffa08dde5da703fabfb45d007713836d42
     (new_dihedral(p))
+
     """
     p0 = np.asarray(pt1)
     p1 = np.asarray(pt2)
@@ -158,3 +203,11 @@ def get_dihedral(pt1, pt2, pt3, pt4):
     x = np.dot(v, w)
     y = np.dot(np.cross(b1, v), w)
     return np.degrees(np.arctan2(y, x))
+
+
+def arbitrary_round(x, base):
+    """
+    Round x to nearest base.
+
+    """
+    return base * round(x/base)
