@@ -140,7 +140,7 @@ def histogram_plot_N(Y, X_range, width, alpha, color, edgecolor,
                 align='edge',
                 alpha=alpha,
                 width=width,
-                color=colors[I],
+                color=color[I],
                 edgecolor=edgecolor,
                 label=label
             )
