@@ -12,8 +12,11 @@ Date Created: 18 Mar 2019
 
 from glob import glob
 import stk
+import numpy as np
 import logging
+from itertools import combinations
 import sys
+from .calculations import get_dihedral
 
 
 def build_ABCBA(core, liga, link, flippedlink=False):
@@ -450,3 +453,109 @@ def update_from_rdkit_conf(struct, mol, conf_id):
     pos_mat = mol.GetConformer(id=conf_id).GetPositions()
     struct.set_position_matrix(pos_mat)
     return struct
+
+
+def get_stk_bond_angle(mol, atom1_id, atom2_id, atom3_id):
+    atom1_pos = np.asarray([
+        i for i in mol.get_atom_positions(atom_ids=[atom1_id])
+    ][0])
+    atom2_pos = np.asarray([
+        i for i in mol.get_atom_positions(atom_ids=[atom2_id])
+    ][0])
+    atom3_pos = np.asarray([
+        i for i in mol.get_atom_positions(atom_ids=[atom3_id])
+    ][0])
+    v1 = atom1_pos - atom2_pos
+    v2 = atom3_pos - atom2_pos
+    return stk.vector_angle(v1, v2)
+
+
+def get_square_planar_distortion(mol, metal, bonder):
+    """
+    Calculate measures of distortion of a square planer metal.
+
+    Parameters
+    ----------
+    mol : :class:`stk.ConstructedMolecule`
+        stk molecule to analyse.
+
+    metal : :class:`int`
+        Element number of metal atom.
+
+    bonder : :class:`int`
+        Element number of atoms bonded to metal.
+
+    Returns
+    -------
+    results : :class:`dict`
+        Dictionary containing 'bond_lengths', 'angles', 'torsions'.
+
+    """
+    results = {'bond_lengths': [], 'angles': [], 'torsions': []}
+
+    # Find metal atoms.
+    metal_atoms = []
+    for atom in mol.atoms:
+        if atom.atomic_number == metal:
+            metal_atoms.append(atom)
+
+    # Find bonders.
+    metal_bonds = []
+    ids_to_metals = []
+    for bond in mol.bonds:
+        if bond.atom1 in metal_atoms:
+            metal_bonds.append(bond)
+            ids_to_metals.append(bond.atom2.id)
+        elif bond.atom2 in metal_atoms:
+            metal_bonds.append(bond)
+            ids_to_metals.append(bond.atom1.id)
+
+    # Calculate bond lengths.
+    for bond in metal_bonds:
+        results['bond_lengths'].append(
+            mol.get_atom_distance(
+                atom1_id=bond.atom1.id,
+                atom2_id=bond.atom2.id,
+            )
+        )
+
+    # Calculate bond angles.
+    for bonds in combinations(metal_bonds, r=2):
+        bond1, bond2 = bonds
+        bond1_atoms = [bond1.atom1, bond1.atom2]
+        bond2_atoms = [bond2.atom1, bond2.atom2]
+        pres_atoms = list(set(bond1_atoms + bond2_atoms))
+        # If there are more than 3 atoms, implies two
+        # independant bonds.
+        if len(pres_atoms) > 3:
+            continue
+        for atom in pres_atoms:
+            if atom in bond1_atoms and atom in bond2_atoms:
+                idx2 = atom.id
+            elif atom in bond1_atoms:
+                idx1 = atom.id
+            elif atom in bond2_atoms:
+                idx3 = atom.id
+        results['angles'].append(
+            np.degrees(get_stk_bond_angle(
+                mol=mol,
+                atom1_id=idx1,
+                atom2_id=idx2,
+                atom3_id=idx3,
+            ))
+        )
+
+    # Calculate torsion.
+    for metal_atom in metal_atoms:
+        torsion_ids = []
+        for bond in metal_bonds:
+            if metal_atom.id == bond.atom1.id:
+                torsion_ids.append(bond.atom2.id)
+            elif metal_atom.id == bond.atom2.id:
+                torsion_ids.append(bond.atom1.id)
+        atom_positions = [
+            i for i in mol.get_atom_positions(atom_ids=torsion_ids)
+        ]
+        results['torsions'].append(abs(get_dihedral(*atom_positions)))
+
+    return results
