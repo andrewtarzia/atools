@@ -166,3 +166,17 @@ def arbitrary_round(x, base):
 
     """
     return base * round(x/base)
+
+
+def shortest_distance_to_plane(plane, point):
+    """
+    Calculate the perpendicular distance beween a point and a plane.
+
+    """
+    top = abs(
+        plane[0]*point[0] + plane[1]*point[1] +
+        plane[2]*point[2] - plane[3]
+    )
+    bottom = np.sqrt(plane[0]**2 + plane[1]**2 + plane[2]**2)
+    distance = top / bottom
+    return distance

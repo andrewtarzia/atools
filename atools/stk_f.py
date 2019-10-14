@@ -16,7 +16,7 @@ import numpy as np
 import logging
 from itertools import combinations
 import sys
-from .calculations import get_dihedral
+from .calculations import get_dihedral, shortest_distance_to_plane
 
 
 def build_ABCBA(core, liga, link, flippedlink=False):
@@ -491,7 +491,10 @@ def get_square_planar_distortion(mol, metal, bonder):
         Dictionary containing 'bond_lengths', 'angles', 'torsions'.
 
     """
-    results = {'bond_lengths': [], 'angles': [], 'torsions': []}
+    results = {
+        'bond_lengths': [], 'angles': [],
+        'torsions': [], 'plane_dev': []
+    }
 
     # Find metal atoms.
     metal_atoms = []
@@ -536,14 +539,15 @@ def get_square_planar_distortion(mol, metal, bonder):
                 idx1 = atom.id
             elif atom in bond2_atoms:
                 idx3 = atom.id
-        results['angles'].append(
-            np.degrees(get_stk_bond_angle(
-                mol=mol,
-                atom1_id=idx1,
-                atom2_id=idx2,
-                atom3_id=idx3,
-            ))
-        )
+
+        angle = np.degrees(get_stk_bond_angle(
+            mol=mol,
+            atom1_id=idx1,
+            atom2_id=idx2,
+            atom3_id=idx3,
+        ))
+        if angle < 120:
+            results['angles'].append(angle)
 
     # Calculate torsion.
     for metal_atom in metal_atoms:
@@ -557,5 +561,30 @@ def get_square_planar_distortion(mol, metal, bonder):
             i for i in mol.get_atom_positions(atom_ids=torsion_ids)
         ]
         results['torsions'].append(abs(get_dihedral(*atom_positions)))
+
+    # Calculate deviation of metal from bonder plane.
+    for metal_atom in metal_atoms:
+        binder_atom_ids = [metal_atom.id]
+        for bond in metal_bonds:
+            if metal_atom.id == bond.atom1.id:
+                binder_atom_ids.append(bond.atom2.id)
+            elif metal_atom.id == bond.atom2.id:
+                binder_atom_ids.append(bond.atom1.id)
+        centroid = mol.get_centroid(atom_ids=binder_atom_ids)
+        normal = mol.get_plane_normal(atom_ids=binder_atom_ids)
+        # Plane of equation ax + by + cz = d.
+        binder_atom_plane = np.append(normal, np.sum(normal*centroid))
+        # Define the plane deviation as the sum of the distance of all
+        # atoms from the plane defined by all atoms.
+        plane_dev = sum([
+            shortest_distance_to_plane(
+                binder_atom_plane,
+                np.asarray([
+                    i for i in mol.get_atom_positions(atom_ids=[i])
+                ][0])
+            )
+            for i in binder_atom_ids
+        ])
+        results['plane_dev'].append(plane_dev)
 
     return results
