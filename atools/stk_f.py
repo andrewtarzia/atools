@@ -488,7 +488,8 @@ def get_square_planar_distortion(mol, metal, bonder):
     Returns
     -------
     results : :class:`dict`
-        Dictionary containing 'bond_lengths', 'angles', 'torsions'.
+        Dictionary containing 'bond_lengths', 'angles', 'torsions' and
+        'plane_dev'.
 
     """
     results = {
