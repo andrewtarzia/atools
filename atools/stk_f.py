@@ -16,7 +16,11 @@ import numpy as np
 import logging
 from itertools import combinations
 import sys
-from .calculations import get_dihedral, shortest_distance_to_plane
+from .calculations import (
+    get_dihedral,
+    shortest_distance_to_plane,
+    angle_between
+)
 
 
 def build_ABCBA(core, liga, link, flippedlink=False):
@@ -632,3 +636,198 @@ def split_molecule(mol, N, fg_end, core=False, fg='bromine'):
         sys.exit(f'{N} molecules were not found.')
 
     return molecules
+
+
+def calculate_NN_distance(bb, constructed=False):
+    """
+    Calculate the N-N distance of ditopic building block.
+
+    This function will not work for cages built from FGs other than
+    metals + pyridine_N_metal.
+
+    Parameters
+    ----------
+    bb : :class:`stk.BuildingBlock`
+        stk molecule to analyse.
+
+    constructed : :class:`bool`
+        `True` if bb is part of a ConstructedMolecule.
+        Is so, Calculates the NN distance for all relavent building
+        blocks.
+
+    Returns
+    -------
+    NN_distance : :class:`float` or :class:`list` of :class:`float`
+        Distance(s) between [angstrom] deleters in functional groups.
+
+    """
+
+    if constructed:
+        # C building block id : [N atom ids]
+        NN_pairings = {}
+        for bond in bb.construction_bonds:
+            if bond.atom1.atomic_number == 7:
+                n_atom = bond.atom1
+                other_atom = bond.atom2
+            elif bond.atom2.atomic_number == 7:
+                n_atom = bond.atom2
+                other_atom = bond.atom1
+            else:
+                continue
+            if other_atom.building_block_id not in NN_pairings:
+                NN_pairings[other_atom.building_block_id] = [n_atom.id]
+            elif n_atom.id not in NN_pairings[
+                other_atom.building_block_id
+            ]:
+                NN_pairings[other_atom.building_block_id].append(
+                    n_atom.id
+                )
+
+        # Get N atoms that are part of functional groups that reacted
+        # with the same BB.
+        NN_distance = []
+        for BB in NN_pairings:
+            atom1_id, atom2_id = NN_pairings[BB]
+            dist = bb.get_atom_distance(atom1_id, atom2_id)
+            NN_distance.append(dist)
+        return NN_distance
+    else:
+        fg_counts = 0
+        N_positions = []
+        for fg in bb.func_groups:
+            if 'pyridine_N_metal' == fg.fg_type.name:
+                fg_counts += 1
+                # Get geometrical properties of the FG.
+                # Get N position - deleter.
+                N_position = bb.get_center_of_mass(
+                    atom_ids=fg.get_deleter_ids()
+                )
+                N_positions.append(N_position)
+
+        if fg_counts != 2:
+            sys.exit(
+                f'{bb} does not have 2 pyridine_N_metal functional '
+                'groups.'
+            )
+
+        # Calculate the angle between the two vectors.
+        NN_distance = np.linalg.norm(N_positions[0] - N_positions[1])
+        return NN_distance
+
+
+def calculate_bite_angle(bb, constructed=False):
+    """
+    Calculate the bite angle of a ditopic building block.
+
+    This function will not work for cages built from FGs other than
+    metals + pyridine_N_metal.
+
+    Parameters
+    ----------
+    bb : :class:`stk.BuildingBlock`
+        stk molecule to analyse.
+
+    constructed : :class:`bool`
+        `True` if bb is part of a ConstructedMolecule.
+        Is so, Calculates the bite angle for all relavent building
+        blocks.
+
+    Returns
+    -------
+    bite_angle : :class:`float` or :class:`list` of :class:`float`
+        Angle(s) between two bonding vectors of molecule.
+
+    """
+
+    if constructed:
+        # C building block id : [N atom ids]
+        NN_pairings = {}
+        # N_atom_ids : [bonded C ids]
+        N_bonded_Cs = {}
+        for bond in bb.construction_bonds:
+            if bond.atom1.atomic_number == 7:
+                n_atom = bond.atom1
+                other_atom = bond.atom2
+            elif bond.atom2.atomic_number == 7:
+                n_atom = bond.atom2
+                other_atom = bond.atom1
+            else:
+                continue
+            if other_atom.building_block_id not in NN_pairings:
+                NN_pairings[other_atom.building_block_id] = [n_atom.id]
+            elif n_atom.id not in NN_pairings[
+                other_atom.building_block_id
+            ]:
+                NN_pairings[other_atom.building_block_id].append(
+                    n_atom.id
+                )
+
+            if n_atom.id not in N_bonded_Cs:
+                N_bonded_Cs[n_atom.id] = [other_atom.id]
+            else:
+                N_bonded_Cs[n_atom.id].append(other_atom.id)
+
+        # Get N atoms that are part of functional groups that reacted
+        # with the same BB.
+        bite_angle = []
+        for BB in NN_pairings:
+            fg_counts = 0
+            fg_vectors = []
+            for n_atom_id in NN_pairings[BB]:
+                fg_counts += 1
+                # Get geometrical properties of the FG.
+                # Get N position.
+                N_position = bb.get_center_of_mass(
+                    atom_ids=[n_atom_id]
+                )
+
+                # Get the ids of the C atoms bonded to N.
+                bonded_C_ids = N_bonded_Cs[n_atom_id]
+
+                # Get COM of neighbouring C atom positions - bonders.
+                CC_MP = bb.get_center_of_mass(
+                    atom_ids=bonded_C_ids
+                )
+
+                # Get vector between COM and N position.
+                v = N_position - CC_MP
+                fg_vectors.append(v)
+
+            if fg_counts != 2:
+                sys.exit(
+                    f'{bb} does not have 2 pyridine_N_metal '
+                    'functional groups.'
+                )
+            bite_angle.append(np.degrees(
+                angle_between(*fg_vectors)
+            ))
+
+        return bite_angle
+    else:
+        fg_counts = 0
+        fg_vectors = []
+        for fg in bb.func_groups:
+            if 'pyridine_N_metal' == fg.fg_type.name:
+                fg_counts += 1
+                # Get geometrical properties of the FG.
+                # Get N position - deleter.
+                N_position = bb.get_center_of_mass(
+                    atom_ids=fg.get_deleter_ids()
+                )
+                # Get COM of neighbouring C atom positions - bonders.
+                CC_MP = bb.get_center_of_mass(
+                    atom_ids=fg.get_bonder_ids()
+                )
+                # Get vector between COM and N position.
+                v = N_position - CC_MP
+                fg_vectors.append(v)
+
+        if fg_counts != 2:
+            sys.exit(
+                f'{bb} does not have 2 pyridine_N_metal functional '
+                'groups.'
+            )
+
+        # Calculate the angle between the two vectors.
+        bite_angle = np.degrees(angle_between(*fg_vectors))
+        return bite_angle
