@@ -11,6 +11,7 @@ Date Created: 18 Mar 2019
 """
 
 from glob import glob
+from os.path import exists
 import stk
 import numpy as np
 import logging
@@ -831,3 +832,55 @@ def calculate_bite_angle(bb, constructed=False):
         # Calculate the angle between the two vectors.
         bite_angle = np.degrees(angle_between(*fg_vectors))
         return bite_angle
+
+
+def calculate_ligand_distortion(mol, cage_name, free_ligand_name=None):
+    """
+    Calculate ligand distorion of ligands in mol.
+
+    """
+    if free_ligand_name is None:
+        free_ligand_name = cage_name.replace('het_', '').split('_m')[0]
+    if exists(f'{free_ligand_name}_opt.mol'):
+        free_ligand = stk.BuildingBlock.init_from_file(
+            f'{free_ligand_name}_opt.mol',
+            functional_groups=['pyridine_N_metal']
+        )
+    else:
+        sys.exit('need to build and opt all ligands!')
+    # First measure is N-N distance.
+    # Get N-N distance of all ligands in cage.
+    cage_NNs = calculate_NN_distance(
+        bb=mol,
+        constructed=True
+    )
+
+    # Get N-N distance of free ligand.
+    free_NN = calculate_NN_distance(
+        bb=free_ligand,
+        constructed=False
+    )
+    # Get average difference between NN in cage and free.
+    NN_avg_cage_min_free = np.average([
+        abs(i-free_NN) for i in cage_NNs
+    ])
+
+    # Second measure is bite angle.
+    # Get bite angle of all ligands in cage.
+    cage_bites = calculate_bite_angle(
+        bb=mol,
+        constructed=True
+    )
+
+    # Get bite angle of free ligand.
+    free_bite = calculate_bite_angle(
+        bb=free_ligand,
+        constructed=False
+    )
+    # Get average difference between bite angle of each ligand and
+    # free.
+    bite_avg_cage_min_free = np.average([
+        abs(i-free_bite) for i in cage_bites
+    ])
+
+    return NN_avg_cage_min_free, bite_avg_cage_min_free
