@@ -799,9 +799,9 @@ def calculate_bite_angle(bb, constructed=False):
                     f'{bb} does not have 2 pyridine_N_metal '
                     'functional groups.'
                 )
-            bite_angle.append(np.degrees(
+            bite_angle.append(abs(np.degrees(
                 angle_between(*fg_vectors)
-            ))
+            )))
 
         return bite_angle
     else:
@@ -830,7 +830,7 @@ def calculate_bite_angle(bb, constructed=False):
             )
 
         # Calculate the angle between the two vectors.
-        bite_angle = np.degrees(angle_between(*fg_vectors))
+        bite_angle = abs(np.degrees(angle_between(*fg_vectors)))
         return bite_angle
 
 
