@@ -19,7 +19,20 @@ import re
 
 def replace(string, substitutions):
     """
-    Replace multiple substrings
+    Replace multiple substrings.
+
+    Parameters
+    ----------
+    string : :class:`str`
+        String to make substitutions in.
+
+    substitutions : :class:`dict` of :class:`str` pairs
+        Dictionary where values replace keys in string.
+
+    Returns
+    -------
+    :class:`str`
+        String with substitutions made.
 
     """
 
