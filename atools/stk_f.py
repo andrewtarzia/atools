@@ -642,7 +642,7 @@ def split_molecule(mol, N, fg_end, core=False, fg='bromine'):
     return molecules
 
 
-def calculate_NN_distance(bb, constructed=False):
+def calculate_NN_distance(bb, constructed=False, target_BB=None):
     """
     Calculate the N-N distance of ditopic building block.
 
@@ -667,6 +667,26 @@ def calculate_NN_distance(bb, constructed=False):
     """
 
     if constructed:
+        if target_BB is None:
+            target_bb_ids = [
+                i for block in bb.building_block_counter
+                for i in range(bb.building_block_counter[block])
+            ]
+        else:
+            # Iterate over building blocks.
+            target_bb_ids = []
+            target_ident = target_BB.get_identity_key()
+            id = 0
+            for block in bb.building_block_counter:
+                for i in range(bb.building_block_counter[block]):
+                    ident = block.get_identity_key()
+                    if ident == target_ident:
+                        target_bb_ids.append(id)
+                    id += 1
+
+        # Only get properties if BB matches target_BB
+        # (collect all if target_BB is None).
+
         # C building block id : [N atom ids]
         NN_pairings = {}
         for bond in bb.construction_bonds:
@@ -677,6 +697,8 @@ def calculate_NN_distance(bb, constructed=False):
                 n_atom = bond.atom2
                 other_atom = bond.atom1
             else:
+                continue
+            if other_atom.building_block_id not in target_bb_ids:
                 continue
             if other_atom.building_block_id not in NN_pairings:
                 NN_pairings[other_atom.building_block_id] = [n_atom.id]
@@ -719,7 +741,7 @@ def calculate_NN_distance(bb, constructed=False):
         return NN_distance
 
 
-def calculate_bite_angle(bb, constructed=False):
+def calculate_bite_angle(bb, constructed=False, target_BB=None):
     """
     Calculate the bite angle of a ditopic building block.
 
@@ -744,6 +766,26 @@ def calculate_bite_angle(bb, constructed=False):
     """
 
     if constructed:
+        if target_BB is None:
+            target_bb_ids = [
+                i for block in bb.building_block_counter
+                for i in range(bb.building_block_counter[block])
+            ]
+        else:
+            # Iterate over building blocks.
+            target_bb_ids = []
+            target_ident = target_BB.get_identity_key()
+            id = 0
+            for block in bb.building_block_counter:
+                for i in range(bb.building_block_counter[block]):
+                    ident = block.get_identity_key()
+                    if ident == target_ident:
+                        target_bb_ids.append(id)
+                    id += 1
+
+        # Only get properties if BB matches target_BB
+        # (collect all if target_BB is None).
+
         # C building block id : [N atom ids]
         NN_pairings = {}
         # N_atom_ids : [bonded C ids]
@@ -757,6 +799,10 @@ def calculate_bite_angle(bb, constructed=False):
                 other_atom = bond.atom1
             else:
                 continue
+
+            if other_atom.building_block_id not in target_bb_ids:
+                continue
+
             if other_atom.building_block_id not in NN_pairings:
                 NN_pairings[other_atom.building_block_id] = [n_atom.id]
             elif n_atom.id not in NN_pairings[
@@ -837,18 +883,39 @@ def calculate_bite_angle(bb, constructed=False):
         return bite_angle
 
 
-def calculate_ligand_distortion(mol, cage_name, free_ligand_name=None):
+def filter_pyridine_FGs(mol):
+
+    # Get all FG distances.
+    fg_dists = sorted(
+        [i for i in mol.get_bonder_distances()],
+        key=lambda x: x[2],
+        reverse=True
+    )
+    fgs_to_keep = [fg_dists[0][0], fg_dists[0][1]]
+    mol.func_groups = tuple([
+        mol.func_groups[i] for i, j in enumerate(mol.func_groups)
+        if i in fgs_to_keep
+    ])
+
+    return mol
+
+
+def calculate_ligand_distortion(
+    mol,
+    cage_name,
+    free_ligand_name
+):
     """
     Calculate ligand distorion of ligands in mol.
 
     """
-    if free_ligand_name is None:
-        free_ligand_name = cage_name.replace('het_', '').split('_m')[0]
-    if exists(f'{free_ligand_name}_opt.mol'):
+
+    if exists(free_ligand_name):
         free_ligand = stk.BuildingBlock.init_from_file(
-            f'{free_ligand_name}_opt.mol',
+            free_ligand_name,
             functional_groups=['pyridine_N_metal']
         )
+        free_ligand = filter_pyridine_FGs(free_ligand)
     else:
         raise ValueError('need to build and opt all ligands!')
 
@@ -856,7 +923,8 @@ def calculate_ligand_distortion(mol, cage_name, free_ligand_name=None):
     # Get N-N distance of all ligands in cage.
     cage_NNs = calculate_NN_distance(
         bb=mol,
-        constructed=True
+        constructed=True,
+        target_BB=free_ligand
     )
 
     # Get N-N distance of free ligand.
@@ -873,7 +941,8 @@ def calculate_ligand_distortion(mol, cage_name, free_ligand_name=None):
     # Get bite angle of all ligands in cage.
     cage_bites = calculate_bite_angle(
         bb=mol,
-        constructed=True
+        constructed=True,
+        target_BB=free_ligand
     )
 
     # Get bite angle of free ligand.
