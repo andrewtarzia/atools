@@ -151,9 +151,11 @@ def topo_2_property(topology, property):
     """
     properties = ['stk_func', 'stoich', 'noimines', 'expected_wind']
     if property not in properties:
-        logging.info(f'{property} not defined')
-        logging.info(f'possible properties: {properties}')
-        sys.exit('exitting.')
+        raise ValueError(
+            f'{property} not defined'
+            f'possible properties: {properties}'
+            'exitting.'
+        )
 
     dict = {
         '2p3': {
@@ -210,8 +212,10 @@ def topo_2_property(topology, property):
         },
     }
     if topology not in dict:
-        logging.info(f'properties not defined for {topology}')
-        sys.exit('exitting')
+        raise ValueError(
+            f'properties not defined for {topology}'
+            'exitting'
+        )
     return dict[topology][property]
 
 
@@ -368,8 +372,7 @@ def optimize_structunit(infile, outfile, exec,
         struct.write(outfile)
         logging.info('done')
     else:
-        logging.info(f'{method} is not implemented yet.')
-        sys.exit('exitting')
+        raise NotImplementedError(f'{method} is not implemented yet.')
 
 
 def build_and_opt_cage(prefix, BB1, BB2, topology, macromod_,
@@ -627,14 +630,14 @@ def split_molecule(mol, N, fg_end, core=False, fg='bromine'):
     # Get number of fg_end.
     no_fg_end = 0
     if no_fg_end != N:
-        sys.exit(f'{N} {fg_end} were not found in molecule.')
+        raise ValueError(f'{N} {fg_end} were not found in molecule.')
 
     # For each fg_end, set a start atom.
 
     # Iterate through graph from
 
     if len(molecules) != N:
-        sys.exit(f'{N} molecules were not found.')
+        raise ValueError(f'{N} molecules were not found.')
 
     return molecules
 
@@ -706,7 +709,7 @@ def calculate_NN_distance(bb, constructed=False):
                 N_positions.append(N_position)
 
         if fg_counts != 2:
-            sys.exit(
+            raise ValueError(
                 f'{bb} does not have 2 pyridine_N_metal functional '
                 'groups.'
             )
@@ -794,8 +797,8 @@ def calculate_bite_angle(bb, constructed=False):
                 v = N_position - CC_MP
                 fg_vectors.append(v)
 
-            if fg_counts != 2:
-                sys.exit(
+            if fg_counts < 2:
+                raise ValueError(
                     f'{bb} does not have 2 pyridine_N_metal '
                     'functional groups.'
                 )
@@ -824,7 +827,7 @@ def calculate_bite_angle(bb, constructed=False):
                 fg_vectors.append(v)
 
         if fg_counts != 2:
-            sys.exit(
+            raise ValueError(
                 f'{bb} does not have 2 pyridine_N_metal functional '
                 'groups.'
             )
@@ -847,7 +850,8 @@ def calculate_ligand_distortion(mol, cage_name, free_ligand_name=None):
             functional_groups=['pyridine_N_metal']
         )
     else:
-        sys.exit('need to build and opt all ligands!')
+        raise ValueError('need to build and opt all ligands!')
+
     # First measure is N-N distance.
     # Get N-N distance of all ligands in cage.
     cage_NNs = calculate_NN_distance(
@@ -918,7 +922,7 @@ def calculate_N_COM_N_angle(bb):
             fg_positions.append(N_position)
 
     if fg_counts != 2:
-        sys.exit(
+        raise ValueError(
             f'{bb} does not have 2 pyridine_N_metal functional '
             'groups.'
         )
