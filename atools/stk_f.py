@@ -659,6 +659,8 @@ def calculate_NN_distance(bb, constructed=False, target_BB=None):
         Is so, Calculates the NN distance for all relavent building
         blocks.
 
+    target_BB
+
     Returns
     -------
     NN_distance : :class:`float` or :class:`list` of :class:`float`
@@ -757,6 +759,8 @@ def calculate_bite_angle(bb, constructed=False, target_BB=None):
         `True` if bb is part of a ConstructedMolecule.
         Is so, Calculates the bite angle for all relavent building
         blocks.
+
+    target_BB
 
     Returns
     -------
@@ -903,7 +907,9 @@ def filter_pyridine_FGs(mol):
 def calculate_ligand_distortion(
     mol,
     cage_name,
-    free_ligand_name
+    free_ligand_name,
+    free_NN_dists=None,
+    free_bite_dists=None,
 ):
     """
     Calculate ligand distorion of ligands in mol.
@@ -927,11 +933,14 @@ def calculate_ligand_distortion(
         target_BB=free_ligand
     )
 
-    # Get N-N distance of free ligand.
-    free_NN = calculate_NN_distance(
-        bb=free_ligand,
-        constructed=False
-    )
+    if free_NN_dists is None:
+        # Get N-N distance of free ligand.
+        free_NN = calculate_NN_distance(
+            bb=free_ligand,
+            constructed=False
+        )
+    else:
+        free_NN = np.mean(free_NN_dists)
     # Get average difference between NN in cage and free.
     NN_avg_cage_min_free = np.average([
         abs(i-free_NN) for i in cage_NNs
@@ -945,11 +954,14 @@ def calculate_ligand_distortion(
         target_BB=free_ligand
     )
 
-    # Get bite angle of free ligand.
-    free_bite = calculate_bite_angle(
-        bb=free_ligand,
-        constructed=False
-    )
+    if free_bite_dists is None:
+        # Get bite angle of free ligand.
+        free_bite = calculate_bite_angle(
+            bb=free_ligand,
+            constructed=False
+        )
+    else:
+        free_bite = np.mean(free_bite_dists)
     # Get average difference between bite angle of each ligand and
     # free.
     bite_avg_cage_min_free = np.average([
