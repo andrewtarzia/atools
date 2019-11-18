@@ -70,6 +70,61 @@ def scatter_plot(X, Y, xtitle, ytitle, xlim, ylim, title=None,
     """
     Make scatter plot.
 
+    Parameters
+    ----------
+    X : :class:``
+
+    Y : :class:``
+
+    xtitle : :class:``
+
+    ytitle : :class:``
+
+    xlim : :class:``
+
+    ylim : :class:``
+
+    title : :class:``
+
+    c : :class:``
+
+    edgecolors : :class:``
+
+    marker : :class:``
+
+    alpha : :class:``
+
+    s : :class:``
+
+    Z : :class:``
+
+    cmap : :class:`dict`
+        Dictionary containing information for cmap.
+        Example:
+        {
+            'mid_point': 0.5,
+            'cmap': cm.Purples,
+            'ticks': [0, .50, 1.00],
+            'labels': [
+                '0',
+                '20',
+                '40'
+            ],
+            'cmap_label': 'flex',
+        }
+
+        This requries that the `Z` argument is on the range of 0 to 1.
+        Use 'labels' to define the relationship between cmap and
+        Z value.
+
+
+    Returns
+    -------
+
+    fig
+
+    ax
+
     """
     fig, ax = plt.subplots(figsize=(8, 5))
     if cmap is None and Z is None:
