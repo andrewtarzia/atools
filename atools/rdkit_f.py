@@ -67,28 +67,36 @@ def mol_list2grid(molecules, filename, mol_per_row, maxrows,
     molecules (list) - list of molecule SMILEs
 
     """
+
     if len(molecules) > mol_per_row * maxrows:
         # have to make multiple images
         new_mol_list = []
+        new_names = []
         count = 1
-        for mol in molecules:
+        for i, mol in enumerate(molecules):
             new_mol_list.append(mol)
+            new_names.append(names[i])
             # make image
             if len(new_mol_list) == mol_per_row * maxrows:
-                img = Draw.MolsToGridImage(new_mol_list,
-                                           molsPerRow=mol_per_row,
-                                           subImgSize=subImgSize,
-                                           legends=names,
-                                           useSVG=False)
+                img = Draw.MolsToGridImage(
+                    new_mol_list,
+                    molsPerRow=mol_per_row,
+                    subImgSize=subImgSize,
+                    legends=new_names,
+                    useSVG=False
+                )
                 img.save(filename + '_' + str(count) + '.png')
                 new_mol_list = []
+                new_names = []
                 count += 1
     else:
-        img = Draw.MolsToGridImage(molecules,
-                                   molsPerRow=mol_per_row,
-                                   subImgSize=subImgSize,
-                                   legends=names,
-                                   useSVG=False)
+        img = Draw.MolsToGridImage(
+            molecules,
+            molsPerRow=mol_per_row,
+            subImgSize=subImgSize,
+            legends=names,
+            useSVG=False
+        )
         img.save(filename + '.png')
 
 
