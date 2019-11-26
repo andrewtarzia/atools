@@ -16,7 +16,7 @@ import stk
 import numpy as np
 import logging
 from itertools import combinations
-import sys
+
 from .calculations import (
     get_dihedral,
     shortest_distance_to_plane,
@@ -501,8 +501,12 @@ def get_square_planar_distortion(mol, metal, bonder):
 
     """
     results = {
-        'bond_lengths': [], 'angles': [],
-        'torsions': [], 'plane_dev': []
+        'bond_lengths': [],
+        'angles': [],
+        'torsions': [],
+        'plane_dev': [],
+        'plane_angle_avg': [],
+        'plane_angle_std': []
     }
 
     # Find metal atoms.
@@ -595,6 +599,57 @@ def get_square_planar_distortion(mol, metal, bonder):
             for i in binder_atom_ids
         ])
         results['plane_dev'].append(plane_dev)
+
+    # Calculate N-Pd bond vector and CNC plane angle.
+    for metal_atom in metal_atoms:
+        plane_angles = []
+        # Get metal position.
+        metal_position = mol.get_centroid(atom_ids=[metal_atom.id])
+        # Iterate over metal bonds.
+        for bond in metal_bonds:
+            if metal_atom.id == bond.atom1.id:
+                N_atom_id = bond.atom2.id
+            elif metal_atom.id == bond.atom2.id:
+                N_atom_id = bond.atom1.id
+            else:
+                continue
+            # Get MN vector.
+            N_position = mol.get_centroid(atom_ids=[N_atom_id])
+            print(metal_position, N_position)
+            MN_vector = N_position - metal_position
+            print(MN_vector)
+            # Get CNC atom ids.
+            CNC_atom_ids = [N_atom_id]
+            for bond in mol.bonds:
+                if metal_atom.id in [bond.atom1.id, bond.atom2.id]:
+                    continue
+                if bond.atom1.id == N_atom_id:
+                    CNC_atom_ids.append(bond.atom2.id)
+                elif bond.atom2.id == N_atom_id:
+                    CNC_atom_ids.append(bond.atom1.id)
+
+            print(CNC_atom_ids)
+            mol.write('temp.mol')
+            # Get CNC plane.
+            centroid = mol.get_centroid(atom_ids=CNC_atom_ids)
+            CNC_plane_normal = mol.get_plane_normal(
+                atom_ids=CNC_atom_ids
+            )
+            print(CNC_plane_normal)
+            # Calculate angle between CNC plane and MN vector.
+            pa = np.degrees(angle_between(MN_vector, CNC_plane_normal))
+            print('oa', pa)
+            plane_angles.append(pa)
+
+        print(plane_angles)
+        # Define the plane angle of a metal centre as the sum of all
+        # plane angles of 4 coordinated atoms.
+        plane_angle_avg = np.average([i for i in plane_angles])
+        plane_angle_std = np.std([i for i in plane_angles])
+        print('avg', plane_angle_avg, 'std', plane_angle_std)
+        print('----')
+        results['plane_angle_avg'].append(plane_angle_avg)
+        results['plane_angle_std'].append(plane_angle_std)
 
     return results
 
