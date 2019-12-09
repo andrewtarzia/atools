@@ -11,11 +11,18 @@ Date Created: 10 Dec 2019
 """
 
 import stk
+import os
+from os.path import exists, join
+import glob
+import matplotlib.pyplot as plt
 import logging
+
+import plotting
 
 
 def default_stk_MD_settings():
-    """Default settings from stk source code as of 26/04/19.
+    """
+    Default settings from stk source code as of 26/04/19.
 
     """
     Settings = {'output_dir': None,
@@ -196,3 +203,288 @@ def build_and_opt_cage(prefix, BB1, BB2, topology, macromod_,
     if pdb is True:
         cage.write(prefix + '_opt.pdb')
     return cage
+
+
+def MOC_rdkit_opt(cage, cage_name, do_long):
+    """
+    Perform RDKit optimisation of MOC.
+
+    Parameters
+    ----------
+    cage : :class:`stk.ConstructedMolecule`
+        Cage to be optimised.
+
+    cage_name : :class:`str`
+        Name of cage.
+
+    Returns
+    -------
+    cage : :class:`stk.ConstructedMolecule`
+        Optimised cage.
+
+    """
+
+    # TODO: Add more arguments and options.
+    print('doing rdkit optimisation')
+    optimizer = stk.MetalOptimizer(
+        metal_binder_distance=1.9,
+        metal_binder_fc=1.0e2,
+        binder_ligand_fc=0.0,
+        ignore_vdw=False,
+        rel_distance=None,
+        res_steps=50,
+        restrict_bonds=True,
+        restrict_angles=True,
+        restrict_orientation=True,
+        max_iterations=40,
+        do_long_opt=do_long
+    )
+
+    optimizer.optimize(mol=cage)
+
+    return cage
+
+
+def MOC_uff_opt(cage, cage_name, metal_FFs):
+    """
+    Perform UFF4MOF optimisation of MOC.
+
+    Parameters
+    ----------
+    cage : :class:`stk.ConstructedMolecule`
+        Cage to be optimised.
+
+    cage_name : :class:`str`
+        Name of cage.
+
+    Returns
+    -------
+    cage : :class:`stk.ConstructedMolecule`
+        Optimised cage.
+
+    """
+
+    print('doing UFF4MOF optimisation')
+    gulp_opt = stk.GulpMetalOptimizer(
+        gulp_path='/home/atarzia/software/gulp-5.1/Src/gulp/gulp',
+        metal_FF=metal_FFs,
+        output_dir=f'cage_opt_{cage_name}_uff'
+    )
+    gulp_opt.assign_FF(cage)
+    gulp_opt.optimize(mol=cage)
+
+    return cage
+
+
+def MOC_MD_opt(
+    cage,
+    cage_name,
+    integrator,
+    temperature,
+    N,
+    timestep,
+    equib,
+    production,
+    opt_conf,
+    metal_FFs,
+    save_conf=False
+):
+    """
+    Perform UFF4MOF molecular dynamics of MOC.
+
+    Parameters
+    ----------
+    cage : :class:`stk.ConstructedMolecule`
+        Cage to be optimised.
+
+    cage_name : :class:`str`
+        Name of cage.
+
+    Returns
+    -------
+    cage : :class:`stk.ConstructedMolecule`
+        Optimised cage.
+
+    """
+
+    print('doing UFF4MOF MD')
+    gulp_MD = stk.GulpMDMetalOptimizer(
+        gulp_path='/home/atarzia/software/gulp-5.1/Src/gulp/gulp',
+        metal_FF=metal_FFs,
+        output_dir=f'cage_opt_{cage_name}_MD',
+        integrator=integrator,
+        ensemble='nvt',
+        temperature=temperature,
+        equilbration=equib,
+        production=production,
+        timestep=timestep,
+        N_conformers=N,
+        opt_conformers=opt_conf,
+        save_conformers=save_conf
+    )
+    gulp_MD.assign_FF(cage)
+    gulp_MD.optimize(cage)
+
+    return cage
+
+
+def MOC_xtb_conformers(
+    cage,
+    cage_name,
+    etemp,
+    output_dir,
+    conformer_dir,
+    nc,
+    free_e,
+    charge,
+    opt=False,
+    opt_level=None,
+    solvent=None
+):
+    """
+    Perform GFN2-xTB conformer scan of MOC.
+
+    Parameters
+    ----------
+    cage : :class:`stk.ConstructedMolecule`
+        Cage to be optimised.
+
+    cage_name : :class:`str`
+        Name of cage.
+
+    Returns
+    -------
+    cage : :class:`stk.ConstructedMolecule`
+        Optimised cage.
+
+    """
+
+    if not exists(output_dir):
+        os.mkdir(output_dir)
+
+    if solvent is None:
+        solvent_str = None
+        solvent_grid = 'normal'
+    else:
+        solvent_str, solvent_grid = solvent
+
+    print('doing XTB conformer sorting by energy')
+    conformers = glob.glob(f'{conformer_dir}/conf_*.xyz')
+    ids = []
+    energies = []
+    min_energy = 10E20
+    for file in sorted(conformers):
+        id = file.replace('.xyz', '').split('_')[-1]
+        cage.update_from_file(file)
+        if opt:
+            print(f'optimising conformer {id}')
+            xtb_opt = stk.XTB(
+                xtb_path='/home/atarzia/software/xtb-190806/bin/xtb',
+                output_dir=f'opt_{cage_name}_{id}',
+                gfn_version=2,
+                num_cores=nc,
+                opt_level=opt_level,
+                charge=charge,
+                num_unpaired_electrons=free_e,
+                max_runs=1,
+                electronic_temperature=etemp,
+                calculate_hessian=False,
+                unlimited_memory=True,
+                solvent=solvent_str,
+                solvent_grid=solvent_grid
+            )
+            xtb_opt.optimize(mol=cage)
+            cage.write(join(f'{output_dir}', f'conf_{id}_opt.xyz'))
+
+        print(f'calculating energy of {id}')
+        # Extract energy.
+        xtb_energy = stk.XTBEnergy(
+            xtb_path='/home/atarzia/software/xtb-190806/bin/xtb',
+            output_dir=f'ey_{cage_name}_{id}',
+            num_cores=nc,
+            charge=charge,
+            num_unpaired_electrons=free_e,
+            electronic_temperature=etemp,
+            unlimited_memory=True,
+            solvent=solvent_str,
+            solvent_grid=solvent_grid
+        )
+        energy = xtb_energy.get_energy(cage)
+        if energy < min_energy:
+            min_energy_conformer = file
+            min_energy = energy
+        ids.append(id)
+        energies.append(energy)
+
+    print('done', min_energy, min_energy_conformer)
+    cage.update_from_file(min_energy_conformer)
+
+    energies = [(i-min(energies))*2625.5 for i in energies]
+    fig, ax = plotting.scatter_plot(
+        X=ids, Y=energies,
+        xtitle='conformer id',
+        ytitle='rel. energy [kJ/mol]',
+        xlim=(0, 201),
+        ylim=(-5, 1000)
+    )
+
+    fig.tight_layout()
+    fig.savefig(
+        join(output_dir, f'{cage_name}_conf_energies.pdf'),
+        dpi=720,
+        bbox_inches='tight'
+    )
+    plt.close()
+
+
+def MOC_xtb_opt(
+    cage,
+    cage_name,
+    nc,
+    opt_level,
+    etemp,
+    charge,
+    free_e,
+    solvent=None
+):
+    """
+    Perform GFN2-xTB optimisation of MOC.
+
+    Parameters
+    ----------
+    cage : :class:`stk.ConstructedMolecule`
+        Cage to be optimised.
+
+    cage_name : :class:`str`
+        Name of cage.
+
+    Returns
+    -------
+    cage : :class:`stk.ConstructedMolecule`
+        Optimised cage.
+
+    """
+
+    if solvent is None:
+        solvent_str = None
+        solvent_grid = 'normal'
+    else:
+        solvent_str, solvent_grid = solvent
+
+    print('doing XTB optimisation')
+    xtb_opt = stk.XTB(
+        xtb_path='/home/atarzia/software/xtb-190806/bin/xtb',
+        output_dir=f'cage_opt_{cage_name}_xtb',
+        gfn_version=2,
+        num_cores=nc,
+        opt_level=opt_level,
+        charge=charge,
+        num_unpaired_electrons=free_e,
+        max_runs=1,
+        electronic_temperature=etemp,
+        calculate_hessian=False,
+        unlimited_memory=True,
+        solvent=solvent_str,
+        solvent_grid=solvent_grid
+    )
+    xtb_opt.optimize(mol=cage)
