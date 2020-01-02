@@ -17,7 +17,7 @@ import glob
 import matplotlib.pyplot as plt
 import logging
 
-import plotting
+from .plotting import scatter_plot
 
 
 def default_stk_MD_settings():
@@ -420,7 +420,7 @@ def MOC_xtb_conformers(
     cage.update_from_file(min_energy_conformer)
 
     energies = [(i-min(energies))*2625.5 for i in energies]
-    fig, ax = plotting.scatter_plot(
+    fig, ax = scatter_plot(
         X=ids, Y=energies,
         xtitle='conformer id',
         ytitle='rel. energy [kJ/mol]',
