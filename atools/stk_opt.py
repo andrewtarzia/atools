@@ -339,7 +339,8 @@ def MOC_xtb_conformers(
     charge,
     opt=False,
     opt_level=None,
-    solvent=None
+    solvent=None,
+    handle_failure=False
 ):
     """
     Perform GFN2-xTB conformer scan of MOC.
@@ -376,6 +377,7 @@ def MOC_xtb_conformers(
     for file in sorted(conformers):
         id = file.replace('.xyz', '').split('_')[-1]
         cage.update_from_file(file)
+        opt_failed = False
         if opt:
             print(f'optimising conformer {id}')
             xtb_opt = stk.XTB(
@@ -393,8 +395,14 @@ def MOC_xtb_conformers(
                 solvent=solvent_str,
                 solvent_grid=solvent_grid
             )
-            xtb_opt.optimize(mol=cage)
-            cage.write(join(f'{output_dir}', f'conf_{id}_opt.xyz'))
+            try:
+                xtb_opt.optimize(mol=cage)
+                cage.write(join(f'{output_dir}', f'conf_{id}_opt.xyz'))
+            except stk.XTBConvergenceError:
+                if handle_failure:
+                    opt_failed = True
+                else:
+                    raise stk.XTBConvergenceError()
 
         print(f'calculating energy of {id}')
         # Extract energy.
@@ -409,7 +417,10 @@ def MOC_xtb_conformers(
             solvent=solvent_str,
             solvent_grid=solvent_grid
         )
-        energy = xtb_energy.get_energy(cage)
+        if handle_failure and opt_failed:
+            energy = 10E24
+        else:
+            energy = xtb_energy.get_energy(cage)
         if energy < min_energy:
             min_energy_conformer = file
             min_energy = energy
