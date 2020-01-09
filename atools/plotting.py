@@ -150,6 +150,50 @@ def scatter_plot(X, Y, xtitle, ytitle, xlim, ylim, title=None,
     return fig, ax
 
 
+def histogram_2D(
+    X_data,
+    Y_data,
+    x_bins,
+    y_bins,
+    xtitle,
+    ytitle,
+    xlim,
+    ylim,
+    cmap,
+    density=False
+):
+    """
+    2D-histogram.
+
+    """
+
+    norm = colors.Normalize()
+
+    fig, ax = plt.subplots(figsize=(8, 5))
+
+    hist = ax.hist2d(
+        X_data,
+        Y_data,
+        bins=[x_bins, y_bins],
+        range=[xlim, ylim],
+        density=density,
+        norm=norm,
+        cmap=cmap
+    )
+
+    # Set number of ticks for x-axis
+    ax.tick_params(axis='both', which='major', labelsize=16)
+    ax.set_xlabel(xtitle, fontsize=16)
+    ax.set_ylabel(ytitle, fontsize=16)
+    ax.set_xlim(xlim)
+    ax.set_ylim(ylim)
+    cbar = fig.colorbar(hist[3], ax=ax)
+    cbar.ax.set_ylabel('count', fontsize=16)
+    cbar.ax.tick_params(labelsize=16)
+
+    return fig, ax
+
+
 def histogram_plot_N(Y, X_range, width, alpha, color, edgecolor,
                      xtitle, labels=None, density=False, N=1):
     """
