@@ -9,10 +9,13 @@ Author: Andrew Tarzia
 
 Date Created: 15 Mar 2019
 """
-from os.path import isfile
+
+import os
+from os.path import exists
 from stk import BuildingBlock
 from ase.io import read
 from ase.io.xyz import write_xyz
+import pymatgen as pmg
 from pymatgen.io.cif import CifParser
 import re
 
@@ -41,6 +44,28 @@ def replace(string, substitutions):
     return regex.sub(
         lambda match: substitutions[match.group(0)], string
     )
+
+
+def convert_stk_to_pymatgen(stk_mol):
+    """
+    Convert stk.Molecule to pymatgen.Molecule.
+
+    Parameters
+    ----------
+    stk_mol : :class:`stk.Molecule`
+        stk molecule to convert.
+
+    Returns
+    -------
+    pmg_mol : :class:`pymatgen.Molecule`
+        Corresponding pymatgen Molecule.
+
+    """
+    stk_mol.write('temp.xyz')
+    pmg_mol = pmg.Molecule.from_file('temp.xyz')
+    os.system('rm temp.xyz')
+
+    return pmg_mol
 
 
 def convert_MOL3000_2_PDB_XYZ(file):
@@ -89,7 +114,7 @@ def convert_CIF_2_PDB(file, wstruct=True):
     """
     pdb_file = file.replace('.cif', '.pdb')
     print('converting:', file, 'to', pdb_file)
-    if isfile(pdb_file) is False:
+    if exists(pdb_file) is False:
         try:
             structure = read(file)
         except IndexError:
@@ -121,7 +146,7 @@ def convert_PDB_2_XYZ(file, comment=None):
     """
     xyz_file = file.replace('.pdb', '.xyz')
     print('converting:', file, 'to', xyz_file)
-    if isfile(xyz_file) is False:
+    if exists(xyz_file) is False:
         structure = read(file)
         if comment is None:
             cmt = 'This is an XYZ structure.'
