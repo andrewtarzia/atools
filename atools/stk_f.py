@@ -21,7 +21,7 @@ from .calculations import (
     shortest_distance_to_plane,
     angle_between
 )
-from .pymatgen_f import calculate_site_order_values
+from .pymatgen_f import calculate_sites_order_values
 from .IO_tools import convert_stk_to_pymatgen
 
 
@@ -295,7 +295,7 @@ def get_stk_bond_angle(mol, atom1_id, atom2_id, atom3_id):
     return stk.vector_angle(v1, v2)
 
 
-def get_order_values(mol):
+def get_order_values(mol, metal):
     """
     Calculate order parameters around metal centres.
 
@@ -326,22 +326,32 @@ def get_order_values(mol):
         'plane_angle_avg': [],
         'plane_angle_std': []
     }
-    print(mol)
-    pmg_struct = convert_stk_to_pymatgen(stk_mol=mol)
-    print(pmg_struct)
-    import sys
-    sys.exit()
-    sites = 0
 
-    results = {}
-    for site in sites:
-        site_results = calculate_site_order_values(
-            structure=pmg_struct,
-            site=site
-        )
-        print(site)
-        print(site_results)
-        results[site] = site_results
+    pmg_mol = convert_stk_to_pymatgen(stk_mol=mol)
+    # Get sites of interest and their neighbours.
+    sites = []
+    neighs = []
+    for atom in mol.atoms:
+        if atom.atomic_number == metal:
+            sites.append(atom.id)
+            bonds = [
+                i for i in mol.bonds
+                if i.atom1.id == atom.id or i.atom2.id == atom.id
+            ]
+            a_neigh = []
+            for b in bonds:
+                if b.atom1.id == atom.id:
+                    a_neigh.append(b.atom2.id)
+                elif b.atom2.id == atom.id:
+                    a_neigh.append(b.atom1.id)
+            neighs.append(a_neigh)
+    print(sites, neighs)
+
+    results = calculate_sites_order_values(
+        molecule=pmg_mol,
+        site_idxs=sites,
+        neigh_idxs=neighs
+    )
 
     print(results)
     import sys
