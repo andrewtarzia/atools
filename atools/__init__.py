@@ -8,5 +8,6 @@ from .stk_f import *
 from .zeopp_f import *
 from .metals import *
 from .stk_opt import *
+from .pymatgen_f import *
 
 __version__ = '0.0.1'
