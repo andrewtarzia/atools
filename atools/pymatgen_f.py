@@ -8,7 +8,13 @@ Functions that are useful for pymatgen usage.
 Author: Andrew Tarzia
 
 Date Created: 30 Jan 2020
+
 """
+
+from pymatgen.analysis.local_env import (
+    LocalStructOrderParams,
+)
+
 
 def get_element_sites(molecule, atomic_no):
     """
@@ -36,15 +42,52 @@ def get_element_sites(molecule, atomic_no):
         if Z == atomic_no:
             idxs.append(i)
 
-def calculate_site_order_values(structure, site):
     return idxs
+
+
+def calculate_sites_order_values(molecule, site_idxs, neigh_idxs):
     """
     Calculate order parameters around metal centres.
 
     Parameters
     ----------
+    mol : :class:`stk.ConstructedMolecule`
+        stk molecule to analyse.
+
+    metal : :class:`int`
+        Element number of metal atom.
+
+    bonder : :class:`int`
+        Element number of atoms bonded to metal.
 
     Returns
     -------
+    results : :class:`dict`
+        Dictionary containing 'bond_lengths', 'angles', 'torsions' and
+        'plane_dev'.
+
+    """
+
+    results = {}
+
+    # Define local order parameters class based on desired types.
+    types = [
+        'oct',  # Octahedra OP.
+        'sq_plan',  # Square planar envs.
+        'q2',  # l=2 Steinhardt OP.
+        'q4',  # l=4 Steinhardt OP.
+        'q6',  # l=6 Steinhardt OP.
+    ]
+    loc_ops = LocalStructOrderParams(
+        types=types,
+    )
+
+    for site, neigh in zip(site_idxs, neigh_idxs):
+        site_results = loc_ops.get_order_parameters(
+            structure=molecule,
+            n=site,
+            indices_neighs=neigh
+        )
+        results[site] = site_results
 
     return results
