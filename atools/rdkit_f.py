@@ -59,8 +59,14 @@ def draw_smiles_to_svg(smiles, filename):
     draw_mol_to_svg(mol, filename)
 
 
-def mol_list2grid(molecules, filename, mol_per_row, maxrows,
-                  subImgSize=(200, 200), names=None):
+def mol_list2grid(
+    molecules,
+    filename,
+    mol_per_row,
+    maxrows,
+    subImgSize=(200, 200),
+    names=None
+):
     """
     Produce a grid of molecules in mol_list.
 
@@ -75,7 +81,10 @@ def mol_list2grid(molecules, filename, mol_per_row, maxrows,
         count = 1
         for i, mol in enumerate(molecules):
             new_mol_list.append(mol)
-            new_names.append(names[i])
+            if names is None:
+                new_names = None
+            else:
+                new_names.append(names[i])
             # make image
             if len(new_mol_list) == mol_per_row * maxrows:
                 img = Draw.MolsToGridImage(
@@ -83,9 +92,13 @@ def mol_list2grid(molecules, filename, mol_per_row, maxrows,
                     molsPerRow=mol_per_row,
                     subImgSize=subImgSize,
                     legends=new_names,
-                    useSVG=False
+                    useSVG=True
                 )
-                img.save(filename + '_' + str(count) + '.png')
+                save_svg(
+                    filename=f'{filename}_{count}.svg',
+                    string=img
+                )
+                # img.save(filename + '_' + str(count) + '.png')
                 new_mol_list = []
                 new_names = []
                 count += 1
@@ -95,9 +108,20 @@ def mol_list2grid(molecules, filename, mol_per_row, maxrows,
             molsPerRow=mol_per_row,
             subImgSize=subImgSize,
             legends=names,
-            useSVG=False
+            useSVG=True
         )
-        img.save(filename + '.png')
+        save_svg(filename=f'{filename}.svg', string=img)
+        # img.save(filename + '.png')
+
+
+def save_svg(filename, string):
+    """
+    Save svg text to a file.
+
+    """
+
+    with open(filename, 'w') as f:
+        f.write(string)
 
 
 def read_mol_txt_file(filename):
