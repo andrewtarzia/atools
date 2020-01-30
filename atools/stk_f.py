@@ -21,6 +21,8 @@ from .calculations import (
     shortest_distance_to_plane,
     angle_between
 )
+from .pymatgen_f import calculate_site_order_values
+from .IO_tools import convert_stk_to_pymatgen
 
 
 def build_ABCBA(core, liga, link, flippedlink=False):
@@ -293,6 +295,61 @@ def get_stk_bond_angle(mol, atom1_id, atom2_id, atom3_id):
     return stk.vector_angle(v1, v2)
 
 
+def get_order_values(mol):
+    """
+    Calculate order parameters around metal centres.
+
+    Parameters
+    ----------
+    mol : :class:`stk.ConstructedMolecule`
+        stk molecule to analyse.
+
+    metal : :class:`int`
+        Element number of metal atom.
+
+    bonder : :class:`int`
+        Element number of atoms bonded to metal.
+
+    Returns
+    -------
+    results : :class:`dict`
+        Dictionary containing 'bond_lengths', 'angles', 'torsions' and
+        'plane_dev'.
+
+    """
+
+    results = {
+        'bond_lengths': [],
+        'angles': [],
+        'torsions': [],
+        'plane_dev': [],
+        'plane_angle_avg': [],
+        'plane_angle_std': []
+    }
+    print(mol)
+    pmg_struct = convert_stk_to_pymatgen(stk_mol=mol)
+    print(pmg_struct)
+    import sys
+    sys.exit()
+    sites = 0
+
+    results = {}
+    for site in sites:
+        site_results = calculate_site_order_values(
+            structure=pmg_struct,
+            site=site
+        )
+        print(site)
+        print(site_results)
+        results[site] = site_results
+
+    print(results)
+    import sys
+    sys.exit()
+
+    return results
+
+
 def get_square_planar_distortion(mol, metal, bonder):
     """
     Calculate measures of distortion of a square planer metal.
@@ -315,6 +372,7 @@ def get_square_planar_distortion(mol, metal, bonder):
         'plane_dev'.
 
     """
+
     results = {
         'bond_lengths': [],
         'angles': [],
