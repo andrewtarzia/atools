@@ -194,8 +194,18 @@ def histogram_2D(
     return fig, ax
 
 
-def histogram_plot_N(Y, X_range, width, alpha, color, edgecolor,
-                     xtitle, labels=None, density=False, N=1):
+def histogram_plot_N(
+    Y,
+    X_range,
+    width,
+    alpha,
+    color,
+    edgecolor,
+    xtitle,
+    labels=None,
+    density=False,
+    N=1
+):
     """
     Make histogram plot with 1 distribution.
 
