@@ -51,20 +51,27 @@ def calculate_sites_order_values(molecule, site_idxs, neigh_idxs):
 
     Parameters
     ----------
-    mol : :class:`stk.ConstructedMolecule`
+    molecule : :class:`stk.ConstructedMolecule`
         stk molecule to analyse.
 
-    metal : :class:`int`
-        Element number of metal atom.
+    site_idxs : :class:`list` of :class:`int`
+        Atom ids of sites to calculate OP of.
 
-    bonder : :class:`int`
-        Element number of atoms bonded to metal.
+    neigh_idxs : :class:`list` of :class:`list` of :class:`int`
+        Neighbours of each atom in site_idx. Ordering is important.
 
     Returns
     -------
     results : :class:`dict`
-        Dictionary containing 'bond_lengths', 'angles', 'torsions' and
-        'plane_dev'.
+        Dictionary of format
+        site_idx: dict of order parameters
+        {
+            `oct`: :class:`float`,
+            `sq_plan`: :class:`float`,
+            `q2`: :class:`float`,
+            `q4`: :class:`float`,
+            `q6`: :class:`float`
+        }.
 
     """
 
@@ -88,6 +95,6 @@ def calculate_sites_order_values(molecule, site_idxs, neigh_idxs):
             n=site,
             indices_neighs=neigh
         )
-        results[site] = site_results
+        results[site] = {i: j for i, j in zip(types, site_results)}
 
     return results

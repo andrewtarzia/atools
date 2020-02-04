@@ -307,25 +307,12 @@ def get_order_values(mol, metal):
     metal : :class:`int`
         Element number of metal atom.
 
-    bonder : :class:`int`
-        Element number of atoms bonded to metal.
-
     Returns
     -------
     results : :class:`dict`
-        Dictionary containing 'bond_lengths', 'angles', 'torsions' and
-        'plane_dev'.
+        Dictionary of order parameter max/mins/averages.
 
     """
-
-    results = {
-        'bond_lengths': [],
-        'angles': [],
-        'torsions': [],
-        'plane_dev': [],
-        'plane_angle_avg': [],
-        'plane_angle_std': []
-    }
 
     pmg_mol = convert_stk_to_pymatgen(stk_mol=mol)
     # Get sites of interest and their neighbours.
@@ -345,17 +332,27 @@ def get_order_values(mol, metal):
                 elif b.atom2.id == atom.id:
                     a_neigh.append(b.atom1.id)
             neighs.append(a_neigh)
-    print(sites, neighs)
 
-    results = calculate_sites_order_values(
+    order_values = calculate_sites_order_values(
         molecule=pmg_mol,
         site_idxs=sites,
         neigh_idxs=neighs
     )
+    # Get max, mins and averages of all OPs for the whole molecule.
+    OPs = [order_values[i].keys() for i in order_values][0]
+    OP_lists = {}
+    for OP in OPs:
+        OP_lists[OP] = [order_values[i][OP] for i in order_values]
 
-    print(results)
-    import sys
-    sys.exit()
+    results = {
+        # OP: (min, max, avg)
+        i: {
+            'min': min(OP_lists[i]),
+            'max': max(OP_lists[i]),
+            'avg': np.average(OP_lists[i])
+        }
+        for i in OP_lists
+    }
 
     return results
 

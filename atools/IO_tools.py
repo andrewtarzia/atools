@@ -53,7 +53,7 @@ def convert_stk_to_pymatgen(stk_mol):
     Parameters
     ----------
     stk_mol : :class:`stk.Molecule`
-        stk molecule to convert.
+        Stk molecule to convert.
 
     Returns
     -------
