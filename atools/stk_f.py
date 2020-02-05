@@ -682,20 +682,29 @@ def calculate_bite_angle(bb, constructed=False, target_BB=None):
     """
     Calculate the bite angle of a ditopic building block.
 
+    Here the bite angle is defined as in:
+        https://doi.org/10.1016/j.ccr.2018.06.010
+
+    Uses the vector normal to the plane defined by the building block
+    to determine the `directionality` of the angle.
+
     This function will not work for cages built from FGs other than
     metals + pyridine_N_metal.
 
     Parameters
     ----------
-    bb : :class:`stk.BuildingBlock`
-        stk molecule to analyse.
+    bb : :class:`stk.BuildingBlock` or :class:`stk.ConstructedMolecule`
+        Stk molecule to analyse.
 
     constructed : :class:`bool`
-        `True` if bb is part of a ConstructedMolecule.
+        `True` if bb is part of a :class:`stk.ConstructedMolecule`.
         Is so, Calculates the bite angle for all relavent building
         blocks.
 
-    target_BB
+    target_BB : :class:`stk.BuildingBlock`
+        Stk building block to calculate bite angle of in a
+        :class:`stk.ConstructedMolecule`. Searches for BuidlingBlocks
+        in :class:`stk.ConstructedMolecule` with the same Identity Key.
 
     Returns
     -------
@@ -724,7 +733,8 @@ def calculate_bite_angle(bb, constructed=False, target_BB=None):
 
         # Only get properties if BB matches target_BB
         # (collect all if target_BB is None).
-
+        # C building block id : [all atom  ids]
+        BB_atom_ids = {}
         # C building block id : [N atom ids]
         NN_pairings = {}
         # N_atom_ids : [bonded C ids]
@@ -750,6 +760,13 @@ def calculate_bite_angle(bb, constructed=False, target_BB=None):
                 NN_pairings[other_atom.building_block_id].append(
                     n_atom.id
                 )
+            # Get the atom ids of all atoms in BB for calculating
+            # plane normal.
+            BB_atom_ids[other_atom.building_block_id] = [
+                i.id for i in bb.atoms
+                if i.building_block_id == other_atom.building_block_id
+            ]
+            print(BB_atom_ids)
 
             if n_atom.id not in N_bonded_Cs:
                 N_bonded_Cs[n_atom.id] = [other_atom.id]
@@ -781,15 +798,20 @@ def calculate_bite_angle(bb, constructed=False, target_BB=None):
                 # Get vector between COM and N position.
                 v = N_position - CC_MP
                 fg_vectors.append(v)
+            BB_normal = bb.get_plane_normal(
+                atom_ids=BB_atom_ids[BB]
+            )
+            print(BB_normal)
+            input('you need to check that this works.')
 
             if fg_counts < 2:
                 raise ValueError(
                     f'{bb} does not have 2 pyridine_N_metal '
                     'functional groups.'
                 )
-            bite_angle.append(abs(np.degrees(
-                angle_between(*fg_vectors)
-            )))
+            bite_angle = np.degrees(angle_between(
+                fg_vectors[0], fg_vectors[1], normal=BB_normal
+            ))
 
         return bite_angle
     else:
@@ -811,14 +833,20 @@ def calculate_bite_angle(bb, constructed=False, target_BB=None):
                 v = N_position - CC_MP
                 fg_vectors.append(v)
 
+            # Get the vector normal to the plane defined by the
+            # molecule to determine the direction of the cross product
+            # between the two vectors.
+            BB_normal = bb.get_plane_normal()
+
         if fg_counts != 2:
             raise ValueError(
                 f'{bb} does not have 2 pyridine_N_metal functional '
                 'groups.'
             )
-
         # Calculate the angle between the two vectors.
-        bite_angle = abs(np.degrees(angle_between(*fg_vectors)))
+        bite_angle = np.degrees(angle_between(
+            fg_vectors[0], fg_vectors[1], normal=BB_normal
+        ))
         return bite_angle
 
 
