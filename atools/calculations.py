@@ -97,7 +97,7 @@ def unit_vector(vector):
     return vector / np.linalg.norm(vector)
 
 
-def angle_between(v1, v2):
+def angle_between(v1, v2, normal=None):
     """
     Returns the angle in radians between vectors 'v1' and 'v2'::
 
@@ -115,7 +115,14 @@ def angle_between(v1, v2):
     """
     v1_u = unit_vector(v1)
     v2_u = unit_vector(v2)
-    return np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0))
+    angle = np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0))
+
+    if normal is not None:
+        # Get normal vector and cross product to determine sign.
+        cross = np.cross(v1_u, v2_u)
+        if np.dot(normal, cross) < 0:
+            angle = -angle
+    return angle
 
 
 def get_dihedral(pt1, pt2, pt3, pt4):
