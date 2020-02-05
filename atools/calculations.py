@@ -112,6 +112,9 @@ def angle_between(v1, v2, normal=None):
     angles-between-two-n-dimensional-vectors-in-python/
     13849249#13849249
 
+    If normal is given, the angle polarity is determined using the
+    cross product of the two vectors.
+
     """
     v1_u = unit_vector(v1)
     v2_u = unit_vector(v2)
