@@ -14,6 +14,7 @@ Date Created: 30 Jan 2020
 from pymatgen.analysis.local_env import (
     LocalStructOrderParams,
 )
+from pymatgen.core import Specie
 
 
 def get_element_sites(molecule, atomic_no):
@@ -45,20 +46,31 @@ def get_element_sites(molecule, atomic_no):
     return idxs
 
 
-def calculate_sites_order_values(molecule, site_idxs, neigh_idxs):
+def calculate_sites_order_values(
+    molecule,
+    site_idxs,
+    target_species_type=None,
+    neigh_idxs=None
+):
     """
     Calculate order parameters around metal centres.
 
     Parameters
     ----------
-    molecule : :class:`stk.ConstructedMolecule`
-        stk molecule to analyse.
+    molecule : :class:`pmg.Molecule` or :class:`pmg.Structure`
+        Pymatgen (pmg) molecule/structure to analyse.
 
     site_idxs : :class:`list` of :class:`int`
         Atom ids of sites to calculate OP of.
 
+    target_species_type : :class:`str`
+        Target neighbour element to use in OP calculation.
+        Defaults to :class:`NoneType` if no target species is known.
+
     neigh_idxs : :class:`list` of :class:`list` of :class:`int`
         Neighbours of each atom in site_idx. Ordering is important.
+        Defaults to :class:`NoneType` for when using
+        :class:`pmg.Structure` - i.e. a structure with a lattice.
 
     Returns
     -------
@@ -77,6 +89,11 @@ def calculate_sites_order_values(molecule, site_idxs, neigh_idxs):
 
     results = {}
 
+    if target_species_type is None:
+        targ_species = None
+    else:
+        targ_species = Specie(target_species_type)
+
     # Define local order parameters class based on desired types.
     types = [
         'oct',  # Octahedra OP.
@@ -88,13 +105,22 @@ def calculate_sites_order_values(molecule, site_idxs, neigh_idxs):
     loc_ops = LocalStructOrderParams(
         types=types,
     )
-
-    for site, neigh in zip(site_idxs, neigh_idxs):
-        site_results = loc_ops.get_order_parameters(
-            structure=molecule,
-            n=site,
-            indices_neighs=neigh
-        )
-        results[site] = {i: j for i, j in zip(types, site_results)}
+    if neigh_idxs is None:
+        for site in site_idxs:
+            site_results = loc_ops.get_order_parameters(
+                structure=molecule,
+                n=site,
+                target_spec=[targ_species]
+            )
+            results[site] = {i: j for i, j in zip(types, site_results)}
+    else:
+        for site, neigh in zip(site_idxs, neigh_idxs):
+            site_results = loc_ops.get_order_parameters(
+                structure=molecule,
+                n=site,
+                indices_neighs=neigh,
+                target_spec=targ_species
+            )
+            results[site] = {i: j for i, j in zip(types, site_results)}
 
     return results
