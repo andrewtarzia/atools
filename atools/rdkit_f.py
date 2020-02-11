@@ -59,6 +59,30 @@ def draw_smiles_to_svg(smiles, filename):
     draw_mol_to_svg(mol, filename)
 
 
+def draw_and_save_grid(
+    mol_list,
+    names,
+    subImgSize,
+    mol_per_row,
+    filename
+):
+    """
+    Draw RDKit molecules and save SVG.
+
+    """
+    img = Draw.MolsToGridImage(
+        mol_list,
+        molsPerRow=mol_per_row,
+        subImgSize=subImgSize,
+        legends=names,
+        useSVG=True
+    )
+    save_svg(
+        filename=filename,
+        string=img
+    )
+
+
 def mol_list2grid(
     molecules,
     filename,
@@ -86,32 +110,28 @@ def mol_list2grid(
             else:
                 new_names.append(names[i])
             # make image
-            if len(new_mol_list) == mol_per_row * maxrows:
-                img = Draw.MolsToGridImage(
-                    new_mol_list,
-                    molsPerRow=mol_per_row,
+            chk1 = len(new_mol_list) == mol_per_row * maxrows
+            chk2 = i == len(molecules)-1
+            if chk1 or chk2:
+                draw_and_save_grid(
+                    mol_list=new_mol_list,
+                    mol_per_row=mol_per_row,
                     subImgSize=subImgSize,
-                    legends=new_names,
-                    useSVG=True
-                )
-                save_svg(
-                    filename=f'{filename}_{count}.svg',
-                    string=img
+                    names=new_names,
+                    filename=f'{filename}_{count}.svg'
                 )
                 # img.save(filename + '_' + str(count) + '.png')
                 new_mol_list = []
                 new_names = []
                 count += 1
     else:
-        img = Draw.MolsToGridImage(
-            molecules,
-            molsPerRow=mol_per_row,
+        draw_and_save_grid(
+            mol_list=molecules,
+            mol_per_row=mol_per_row,
             subImgSize=subImgSize,
-            legends=names,
-            useSVG=True
+            names=names,
+            filename=f'{filename}.svg'
         )
-        save_svg(filename=f'{filename}.svg', string=img)
-        # img.save(filename + '.png')
 
 
 def save_svg(filename, string):
