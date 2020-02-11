@@ -225,7 +225,7 @@ def MOC_rdkit_opt(cage, cage_name, do_long):
     """
 
     # TODO: Add more arguments and options.
-    print('doing rdkit optimisation')
+    print(f'..........doing rdkit optimisation of {cage_name}')
     optimizer = stk.MetalOptimizer(
         metal_binder_distance=1.9,
         metal_binder_fc=1.0e2,
@@ -264,7 +264,7 @@ def MOC_uff_opt(cage, cage_name, metal_FFs):
 
     """
 
-    print('doing UFF4MOF optimisation')
+    print(f'..........doing UFF4MOF optimisation of {cage_name}')
     gulp_opt = stk.GulpMetalOptimizer(
         gulp_path='/home/atarzia/software/gulp-5.1/Src/gulp/gulp',
         metal_FF=metal_FFs,
@@ -307,7 +307,7 @@ def MOC_MD_opt(
 
     """
 
-    print('doing UFF4MOF MD')
+    print(f'..........doing UFF4MOF MD of {cage_name}')
     gulp_MD = stk.GulpMDMetalOptimizer(
         gulp_path='/home/atarzia/software/gulp-5.1/Src/gulp/gulp',
         metal_FF=metal_FFs,
@@ -369,7 +369,10 @@ def MOC_xtb_conformers(
     else:
         solvent_str, solvent_grid = solvent
 
-    print('doing XTB conformer sorting by energy')
+    print(
+        f'..........doing XTB conformer sorting by '
+        f'energy of {cage_name}'
+    )
     conformers = glob.glob(f'{conformer_dir}/conf_*.xyz')
     ids = []
     energies = []
@@ -404,7 +407,7 @@ def MOC_xtb_conformers(
                 else:
                     raise stk.XTBConvergenceError()
 
-        print(f'calculating energy of {id}')
+        print(f'..........calculating energy of {id} of {cage_name}')
         # Extract energy.
         xtb_energy = stk.XTBEnergy(
             xtb_path='/home/atarzia/software/xtb-190806/bin/xtb',
@@ -482,7 +485,7 @@ def MOC_xtb_opt(
     else:
         solvent_str, solvent_grid = solvent
 
-    print('doing XTB optimisation')
+    print(f'..........doing XTB optimisation of {cage_name}')
     xtb_opt = stk.XTB(
         xtb_path='/home/atarzia/software/xtb-190806/bin/xtb',
         output_dir=f'cage_opt_{cage_name}_xtb',
