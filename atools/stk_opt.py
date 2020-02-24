@@ -245,6 +245,49 @@ def MOC_rdkit_opt(cage, cage_name, do_long):
     return cage
 
 
+def MOC_unres_rdkit_opt(cage, cage_name, do_long):
+    """
+    Perform unrestricted RDKit optimisation of MOC.
+
+    Parameters
+    ----------
+    cage : :class:`stk.ConstructedMolecule`
+        Cage to be optimised.
+
+    cage_name : :class:`str`
+        Name of cage.
+
+    Returns
+    -------
+    cage : :class:`stk.ConstructedMolecule`
+        Optimised cage.
+
+    """
+
+    # TODO: Add more arguments and options.
+    print(
+        '..........doing unrestricted rdkit optimisation of '
+        f'{cage_name}'
+    )
+    optimizer = stk.MetalOptimizer(
+        metal_binder_distance=1.9,
+        metal_binder_fc=1.0e2,
+        binder_ligand_fc=0.0,
+        ignore_vdw=False,
+        rel_distance=None,
+        res_steps=50,
+        restrict_bonds=False,
+        restrict_angles=False,
+        restrict_orientation=False,
+        max_iterations=40,
+        do_long_opt=do_long
+    )
+
+    optimizer.optimize(mol=cage)
+
+    return cage
+
+
 def MOC_uff_opt(cage, cage_name, metal_FFs):
     """
     Perform UFF4MOF optimisation of MOC.
