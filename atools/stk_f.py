@@ -909,7 +909,6 @@ def calculate_ligand_distortion(
         constructed=True,
         target_BB=free_ligand
     )
-    print('c', cage_bites)
 
     if free_bite_dists is None:
         # Get bite angle of free ligand.
@@ -917,11 +916,10 @@ def calculate_ligand_distortion(
             bb=free_ligand,
             constructed=False
         )
-        print('f2', free_bite)
+
     else:
         free_bite = np.mean(free_bite_dists)
 
-    print('f', free_bite)
     # Get average difference between bite angle of each ligand and
     # free.
     bite_avg_cage_min_free = np.average([
