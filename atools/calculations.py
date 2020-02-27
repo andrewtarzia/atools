@@ -11,8 +11,8 @@ Date Created: 15 Mar 2019
 """
 
 import numpy as np
-import MDAnalysis as mda
-from MDAnalysis.analysis.rms import rmsd
+# import MDAnalysis as mda
+# from MDAnalysis.analysis.rms import rmsd
 import sys
 
 
@@ -23,18 +23,19 @@ def calculate_RMSD(results_part, structure_name, init_structure_dir):
     Code from James Pegg.
 
     """
-    # read in initial structure
-    initial_structure_file = init_structure_dir+structure_name+'.xyz'
-    ref = mda.Universe(initial_structure_file)
-    # read in new structure
-    new_structure_file = 'xtbopt.xyz'
-    mobile = mda.Universe(new_structure_file)
-    # RMSD of all atoms
-    RMSD = rmsd(mobile.atoms.positions,
-                ref.atoms.positions,
-                center=True, superposition=True)
-    results_part['RMSD'] = RMSD
-    return results_part
+    raise NotImplementedError('No RMSD calculator is implemented.')
+    # # read in initial structure
+    # initial_structure_file = init_structure_dir+structure_name+'.xyz'
+    # ref = mda.Universe(initial_structure_file)
+    # # read in new structure
+    # new_structure_file = 'xtbopt.xyz'
+    # mobile = mda.Universe(new_structure_file)
+    # # RMSD of all atoms
+    # RMSD = rmsd(mobile.atoms.positions,
+    #             ref.atoms.positions,
+    #             center=True, superposition=True)
+    # results_part['RMSD'] = RMSD
+    # return results_part
 
 
 def calc_formation_energy(prod, react):
