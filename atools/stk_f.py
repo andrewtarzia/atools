@@ -224,6 +224,7 @@ def is_porous(pore_diameter, max_window_diameter):
     """
     Returns True if a cage is deemed to be porous.
 
+    # TODO: Fill in the doc string for this including defintiions.
     A porous cage is defined as having:
         (Computationally-inspired discovery of an unsymmetrical
         porous organic cage)
@@ -241,6 +242,7 @@ def is_collapsed(topo, pore_diameter, no_window):
     """
     Returns True if a cage is deemed to be collapsed.
 
+    # TODO: Fill in the doc string for this including defintiions.
     A collapsed cage is defined as having:
         - pore_diam_opt < 2.8 Angstrom (H2 kinetic diameter)
         - number of windows != expected number based on topology.
@@ -281,6 +283,7 @@ def update_from_rdkit_conf(struct, mol, conf_id):
 
 
 def get_stk_bond_angle(mol, atom1_id, atom2_id, atom3_id):
+    # TODO: Fill in the doc string for this including defintiions.
     atom1_pos = np.asarray([
         i for i in mol.get_atom_positions(atom_ids=[atom1_id])
     ][0])
@@ -551,6 +554,8 @@ def split_molecule(mol, N, fg_end, core=False, fg='bromine'):
         N molecules.
 
     """
+
+    # TODO: Finish this function.
     molecules = []
 
     # Get number of fg_end.
@@ -566,6 +571,83 @@ def split_molecule(mol, N, fg_end, core=False, fg='bromine'):
         raise ValueError(f'{N} molecules were not found.')
 
     return molecules
+
+
+def get_target_bb_ids(bb, target_BB=None):
+    """
+    Determine the ID of buidling blocks matching target_BB.
+
+    """
+    if target_BB is None:
+        target_bb_ids = [
+            i for block in bb.building_block_counter
+            for i in range(bb.building_block_counter[block])
+        ]
+    else:
+        # Iterate over building blocks.
+        target_bb_ids = []
+        target_ident = target_BB.get_identity_key()
+        id = 0
+        for block in bb.building_block_counter:
+            for i in range(bb.building_block_counter[block]):
+                ident = block.get_identity_key()
+                if ident == target_ident:
+                    target_bb_ids.append(id)
+                id += 1
+
+    return target_bb_ids
+
+
+def calculate_ligand_energy(
+    bb,
+    constructed=False,
+    target_BB=None
+):
+    """
+    Calculate the ligand energy of bb.
+
+    Parameters
+    ----------
+    bb : :class:`stk.BuildingBlock`
+        stk molecule to analyse.
+
+    constructed : :class:`bool`
+        `True` if bb is part of a ConstructedMolecule.
+        Is so, Calculates the strain energy for all relavent building
+        blocks.
+
+    target_BB
+
+    Returns
+    -------
+    energies : :class:`list` of :class:`float`
+        Energies of all bb in ConstructedMolecule if
+        :attr:`contructed` is `True` or energy of bb.
+        Units: kJ/mol.
+
+    """
+
+    if constructed:
+        target_bb_ids = get_target_bb_ids(bb, target_BB)
+
+        # Only get properties if BB matches target_BB
+        # (collect all if target_BB is None).
+
+        # Get BB coordinates and bonds for each target_bb_id.
+        BB_properties = []
+
+        # Iterate through BB properties and output a structure to
+        # calculate the energy of.
+        BB_energies = []
+        for BB in BB_properties:
+            BB_mol = convert_BB_to_mol(BB)
+            BB_energy = get_BB_energy(BB_mol)
+            BB_energies.append(BB_energy)
+        return BB_energies
+    else:
+        BB_energy = get_BB_energy(bb)
+        BB_energies = [BB_energy]
+        return BB_energies
 
 
 def calculate_NN_distance(bb, constructed=False, target_BB=None):
@@ -595,22 +677,7 @@ def calculate_NN_distance(bb, constructed=False, target_BB=None):
     """
 
     if constructed:
-        if target_BB is None:
-            target_bb_ids = [
-                i for block in bb.building_block_counter
-                for i in range(bb.building_block_counter[block])
-            ]
-        else:
-            # Iterate over building blocks.
-            target_bb_ids = []
-            target_ident = target_BB.get_identity_key()
-            id = 0
-            for block in bb.building_block_counter:
-                for i in range(bb.building_block_counter[block]):
-                    ident = block.get_identity_key()
-                    if ident == target_ident:
-                        target_bb_ids.append(id)
-                    id += 1
+        target_bb_ids = get_target_bb_ids(bb, target_BB)
 
         # Only get properties if BB matches target_BB
         # (collect all if target_BB is None).
@@ -705,22 +772,7 @@ def calculate_bite_angle(bb, constructed=False, target_BB=None):
     """
 
     if constructed:
-        if target_BB is None:
-            target_bb_ids = [
-                i for block in bb.building_block_counter
-                for i in range(bb.building_block_counter[block])
-            ]
-        else:
-            # Iterate over building blocks.
-            target_bb_ids = []
-            target_ident = target_BB.get_identity_key()
-            id = 0
-            for block in bb.building_block_counter:
-                for i in range(bb.building_block_counter[block]):
-                    ident = block.get_identity_key()
-                    if ident == target_ident:
-                        target_bb_ids.append(id)
-                    id += 1
+        target_bb_ids = get_target_bb_ids(bb, target_BB)
 
         # Only get properties if BB matches target_BB
         # (collect all if target_BB is None).
@@ -844,6 +896,7 @@ def calculate_bite_angle(bb, constructed=False, target_BB=None):
 
 
 def filter_pyridine_FGs(mol):
+    # TODO: Fill in the doc string for this including defintiions.
 
     # Get all FG distances.
     fg_dists = sorted(
@@ -866,9 +919,21 @@ def calculate_ligand_distortion(
     free_ligand_name,
     free_NN_dists=None,
     free_bite_dists=None,
+    free_energy_dists=None
 ):
     """
     Calculate ligand distorion of ligands in mol.
+
+
+    Strain energy definition:
+    :attr:`contructed` is `True`:
+        strain energy = E(bb extracted from cage) -
+                        E(lowest energy conformer of bb)
+
+    :attr:`contructed` is `False`
+        strain energy = E(bb) - E(lowest energy conformer of bb)
+
+    # TODO: Fill in the doc string for this including defintiions.
 
     """
 
@@ -926,7 +991,27 @@ def calculate_ligand_distortion(
         abs(i-free_bite) for i in cage_bites
     ])
 
-    return NN_avg_cage_min_free, bite_avg_cage_min_free
+    # TODO: Finish this!
+    # free_lig_energy = get_lowest_energy_conformer(bb=free_ligand)
+    #
+    # lig_energies = calculate_ligand_energy(
+    #     bb=mol,
+    #     constructed=True,
+    #     target_BB=free_ligand
+    # )
+    # strain_energies = [i-free_lig_energy for i in lig_energies]
+    # sum_strain_energy = sum(strain_energies)
+    # print(strain_energies, sum_strain_energy)
+    # import sys
+    # sys.exit()
+
+    distortions = (
+        NN_avg_cage_min_free,
+        bite_avg_cage_min_free,
+        # sum_strain_energy
+    )
+
+    return distortions
 
 
 def calculate_N_COM_N_angle(bb):
@@ -975,3 +1060,67 @@ def calculate_N_COM_N_angle(bb):
     # Calculate the angle between the two vectors.
     angle = np.degrees(angle_between(*fg_vectors))
     return angle
+
+
+def get_BB_energy(bb, file_prefix, energy_type='total'):
+    """
+    Get the GFN2-xTB energy of bb.
+
+    Parameters
+    ----------
+    bb : :class:`stk.BuildingBlock`
+        stk molecule to analyse.
+
+    file_prefix : :class:`str`
+        Prefix to file names that will be output in this process.
+        Produces with this prefix:
+            `_lowE_conf.json` : Json containing energy values.
+            `_lowE_conf.mol` : MolFile containing structure.
+            Associated xtb files.
+
+    energy_type : :class:`str`
+        Type of energy to return.
+
+    Returns
+    -------
+    energy :class:`float`
+        Desired energy value in kJ/mol.
+
+    """
+
+
+def get_lowest_energy_conformer(bb, file_prefix, energy_type='total'):
+    """
+    Get the lowest energy conformer of bb using GFN2-xTB and RDKit.
+
+    Parameters
+    ----------
+    bb : :class:`stk.BuildingBlock`
+        stk molecule to analyse.
+
+    file_prefix : :class:`str`
+        Prefix to file names that will be output in this process.
+        Produces with this prefix:
+            `_lowE_conf.json` : Json containing energy values.
+            `_lowE_conf.mol` : MolFile containing structure.
+            Associated xtb files.
+
+    energy_type : :class:`str`
+        Type of energy to return.
+
+    Returns
+    -------
+    energy :class:`float`
+        Desired energy value in kJ/mol.
+
+    """
+
+    if exists(f'{file_prefix}_lowE_conf.json'):
+        # Extract energy from JSON.
+        energy = 0
+    else:
+        # Run calculation.
+        energy = 0
+        BB_energy = get_BB_energy(bb)
+
+    return energy
