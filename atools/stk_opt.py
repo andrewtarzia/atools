@@ -205,6 +205,33 @@ def build_and_opt_cage(prefix, BB1, BB2, topology, macromod_,
     return cage
 
 
+def MOC_collapse(cage, cage_name, step_size, distance_cut):
+    """
+    Perform RDKit optimisation of MOC.
+
+    Parameters
+    ----------
+    cage : :class:`stk.ConstructedMolecule`
+        Cage to be optimised.
+
+    cage_name : :class:`str`
+        Name of cage.
+
+    Returns
+    -------
+    cage : :class:`stk.ConstructedMolecule`
+        Optimised cage.
+
+    """
+
+    # TODO: Add more arguments and options.
+    print(f'..........doing collapser optimisation of {cage_name}')
+    optimizer = stk.Collapser(step_size, distance_cut)
+    optimizer.optimize(mol=cage)
+
+    return cage
+
+
 def MOC_rdkit_opt(cage, cage_name, do_long):
     """
     Perform RDKit optimisation of MOC.
@@ -307,6 +334,7 @@ def MOC_uff_opt(cage, cage_name, metal_FFs):
 
     """
 
+    # TODO: Require Exec
     print(f'..........doing UFF4MOF optimisation of {cage_name}')
     gulp_opt = stk.GulpMetalOptimizer(
         gulp_path='/home/atarzia/software/gulp-5.1/Src/gulp/gulp',
@@ -350,6 +378,7 @@ def MOC_MD_opt(
 
     """
 
+    # TODO: Require Exec
     print(f'..........doing UFF4MOF MD of {cage_name}')
     gulp_MD = stk.GulpMDMetalOptimizer(
         gulp_path='/home/atarzia/software/gulp-5.1/Src/gulp/gulp',
@@ -403,6 +432,7 @@ def MOC_xtb_conformers(
 
     """
 
+    # TODO: Require Exec
     if not exists(output_dir):
         os.mkdir(output_dir)
 
@@ -522,6 +552,7 @@ def MOC_xtb_opt(
 
     """
 
+    # TODO: Require Exec
     if solvent is None:
         solvent_str = None
         solvent_grid = 'normal'
