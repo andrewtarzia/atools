@@ -298,7 +298,7 @@ def get_stk_bond_angle(mol, atom1_id, atom2_id, atom3_id):
     return stk.vector_angle(v1, v2)
 
 
-def get_order_values(mol, metal):
+def get_order_values(mol, metal, per_site=False):
     """
     Calculate order parameters around metal centres.
 
@@ -310,10 +310,14 @@ def get_order_values(mol, metal):
     metal : :class:`int`
         Element number of metal atom.
 
+    per_site : :class:`bool`
+        Defulats to False. True if the OPs for each site are desired.
+
     Returns
     -------
     results : :class:`dict`
-        Dictionary of order parameter max/mins/averages.
+        Dictionary of order parameter max/mins/averages if `per_site`
+        is False.
 
     """
 
@@ -341,23 +345,29 @@ def get_order_values(mol, metal):
         site_idxs=sites,
         neigh_idxs=neighs
     )
-    # Get max, mins and averages of all OPs for the whole molecule.
-    OPs = [order_values[i].keys() for i in order_values][0]
-    OP_lists = {}
-    for OP in OPs:
-        OP_lists[OP] = [order_values[i][OP] for i in order_values]
+    if per_site:
+        results = order_values
+        print('atools, res', results)
+        input()
+        return results
+    else:
+        # Get max, mins and averages of all OPs for the whole molecule.
+        OPs = [order_values[i].keys() for i in order_values][0]
+        OP_lists = {}
+        for OP in OPs:
+            OP_lists[OP] = [order_values[i][OP] for i in order_values]
 
-    results = {
-        # OP: (min, max, avg)
-        i: {
-            'min': min(OP_lists[i]),
-            'max': max(OP_lists[i]),
-            'avg': np.average(OP_lists[i])
+        results = {
+            # OP: (min, max, avg)
+            i: {
+                'min': min(OP_lists[i]),
+                'max': max(OP_lists[i]),
+                'avg': np.average(OP_lists[i])
+            }
+            for i in OP_lists
         }
-        for i in OP_lists
-    }
 
-    return results
+        return results
 
 
 def get_square_planar_distortion(mol, metal, bonder):
