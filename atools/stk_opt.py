@@ -226,7 +226,8 @@ def MOC_collapse(cage, cage_name, step_size, distance_cut):
 
     # TODO: Add more arguments and options.
     print(f'..........doing collapser optimisation of {cage_name}')
-    optimizer = stk.Collapser(step_size, distance_cut)
+    output_dir = f'cage_opt_{cage_name}_coll'
+    optimizer = stk.Collapser(output_dir, step_size, distance_cut)
     optimizer.optimize(mol=cage)
 
     return cage
