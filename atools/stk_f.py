@@ -347,8 +347,6 @@ def get_order_values(mol, metal, per_site=False):
     )
     if per_site:
         results = order_values
-        print('atools, res', results)
-        input()
         return results
     else:
         # Get max, mins and averages of all OPs for the whole molecule.
