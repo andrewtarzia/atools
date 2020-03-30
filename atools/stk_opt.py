@@ -205,7 +205,13 @@ def build_and_opt_cage(prefix, BB1, BB2, topology, macromod_,
     return cage
 
 
-def MOC_collapse(cage, cage_name, step_size, distance_cut):
+def MOC_collapse(
+    cage,
+    cage_name,
+    step_size,
+    distance_cut,
+    scale_steps
+):
     """
     Perform RDKit optimisation of MOC.
 
@@ -227,7 +233,12 @@ def MOC_collapse(cage, cage_name, step_size, distance_cut):
     # TODO: Add more arguments and options.
     print(f'..........doing collapser optimisation of {cage_name}')
     output_dir = f'cage_opt_{cage_name}_coll'
-    optimizer = stk.Collapser(output_dir, step_size, distance_cut)
+    optimizer = stk.Collapser(
+        output_dir,
+        step_size,
+        distance_cut,
+        scale_steps
+    )
     optimizer.optimize(mol=cage)
 
     return cage
