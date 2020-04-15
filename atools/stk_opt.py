@@ -327,7 +327,7 @@ def MOC_unres_rdkit_opt(cage, cage_name, do_long):
     return cage
 
 
-def MOC_uff_opt(cage, cage_name, metal_FFs):
+def MOC_uff_opt(cage, cage_name, metal_FFs, CG=False):
     """
     Perform UFF4MOF optimisation of MOC.
 
@@ -347,12 +347,22 @@ def MOC_uff_opt(cage, cage_name, metal_FFs):
     """
 
     # TODO: Require Exec
-    print(f'..........doing UFF4MOF optimisation of {cage_name}')
-    gulp_opt = stk.GulpMetalOptimizer(
-        gulp_path='/home/atarzia/software/gulp-5.1/Src/gulp/gulp',
-        metal_FF=metal_FFs,
-        output_dir=f'cage_opt_{cage_name}_uff'
-    )
+    if CG:
+        print(
+            f'..........doing CG UFF4MOF optimisation of {cage_name}'
+        )
+        gulp_opt = stk.GulpCGMetalOptimizer(
+            gulp_path='/home/atarzia/software/gulp-5.1/Src/gulp/gulp',
+            metal_FF=metal_FFs,
+            output_dir=f'cage_opt_{cage_name}_uff'
+        )
+    else:
+        print(f'..........doing UFF4MOF optimisation of {cage_name}')
+        gulp_opt = stk.GulpMetalOptimizer(
+            gulp_path='/home/atarzia/software/gulp-5.1/Src/gulp/gulp',
+            metal_FF=metal_FFs,
+            output_dir=f'cage_opt_{cage_name}_uff'
+        )
     gulp_opt.assign_FF(cage)
     gulp_opt.optimize(mol=cage)
 
