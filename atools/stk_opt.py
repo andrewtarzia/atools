@@ -11,6 +11,7 @@ Date Created: 10 Dec 2019
 """
 
 import stk
+import stko
 import os
 from os.path import exists, join
 import glob
@@ -20,23 +21,24 @@ import logging
 from .plotting import scatter_plot
 
 
-def default_stk_MD_settings():
+def default_stko_MD_settings():
     """
     Default settings from stk source code as of 26/04/19.
 
     """
-    Settings = {'output_dir': None,
-                'timeout': None,
-                'force_field': 16,
-                'temperature': 300,  # K
-                'conformers': 50,
-                'time_step': 1.0,  # fs
-                'eq_time': 10,  # ps
-                'simulation_time': 200,  # ps
-                'maximum_iterations': 2500,
-                'minimum_gradient': 0.05,
-                'use_cache': False
-                }
+    Settings = {
+        'output_dir': None,
+        'timeout': None,
+        'force_field': 16,
+        'temperature': 300,  # K
+        'conformers': 50,
+        'time_step': 1.0,  # fs
+        'eq_time': 10,  # ps
+        'simulation_time': 200,  # ps
+        'maximum_iterations': 2500,
+        'minimum_gradient': 0.05,
+        'use_cache': False
+    }
     return Settings
 
 
@@ -46,17 +48,19 @@ def atarzia_short_MD_settings():
 
     Modified on 26/04/19.
     """
-    Settings = {'output_dir': None,
-                'timeout': None,
-                'force_field': 16,
-                'temperature': 700,  # K
-                'conformers': 50,
-                'time_step': 1,  # fs
-                'eq_time': 50,  # ps
-                'simulation_time': 1000,  # ps -- 1 ns
-                'maximum_iterations': 2500,
-                'minimum_gradient': 0.05,
-                'use_cache': False}
+    Settings = {
+        'output_dir': None,
+        'timeout': None,
+        'force_field': 16,
+        'temperature': 700,  # K
+        'conformers': 50,
+        'time_step': 1,  # fs
+        'eq_time': 50,  # ps
+        'simulation_time': 1000,  # ps -- 1 ns
+        'maximum_iterations': 2500,
+        'minimum_gradient': 0.05,
+        'use_cache': False
+    }
     return Settings
 
 
@@ -70,23 +74,30 @@ def atarzia_long_MD_settings():
     Modified on 26/04/19.
     Modified on 06/06/19.
     """
-    Settings = {'output_dir': None,
-                'timeout': None,
-                'force_field': 16,
-                'temperature': 700,  # K
-                'conformers': 5000,  # change from 10000
-                'time_step': 0.5,  # fs
-                'eq_time': 100,  # ps
-                # ps -- 50 ns changed from 100 ns
-                'simulation_time': -500,
-                'maximum_iterations': 2500,
-                'minimum_gradient': 0.05,
-                'use_cache': False}
+    Settings = {
+        'output_dir': None,
+        'timeout': None,
+        'force_field': 16,
+        'temperature': 700,  # K
+        'conformers': 5000,  # change from 10000
+        'time_step': 0.5,  # fs
+        'eq_time': 100,  # ps
+        # ps -- 50 ns changed from 100 ns
+        'simulation_time': -500,
+        'maximum_iterations': 2500,
+        'minimum_gradient': 0.05,
+        'use_cache': False
+    }
     return Settings
 
 
-def optimize_structunit(infile, outfile, exec,
-                        settings=None, method='OPLS'):
+def optimize_molecule(
+    infile,
+    outfile,
+    exec,
+    settings=None,
+    method='OPLS'
+):
     """
     Read file into StructUnit and run optimization via method.
 
@@ -97,17 +108,17 @@ def optimize_structunit(infile, outfile, exec,
         # Use standard settings applied in andrew_marsh work if
         # md/settings is None.
         if settings is None:
-            Settings = default_stk_MD_settings()
+            Settings = default_stko_MD_settings()
         else:
             Settings = settings
         logging.info(f'doing MD optimization of {infile}')
         # restricted=False optimization with OPLS forcefield by default
-        ff = stk.MacroModelForceField(
+        ff = stko.MacroModelForceField(
             macromodel_path=exec, restricted=False
         )
         # MD process - run MD, collect N conformers, optimize each,
         # return lowest energy conformer
-        md = stk.MacroModelMD(
+        md = stko.MacroModelMD(
             macromodel_path=exec,
             output_dir=Settings['output_dir'],
             timeout=Settings['timeout'],
@@ -121,13 +132,13 @@ def optimize_structunit(infile, outfile, exec,
             minimum_gradient=Settings['minimum_gradient'],
             use_cache=Settings['use_cache']
         )
-        macromodel = stk.OptimizerSequence(ff, md)
+        macromodel = stko.OptimizerSequence(ff, md)
         macromodel.optimize(mol=struct)
         struct.write(outfile)
         logging.info('done')
     elif method == 'xtb':
         logging.info(f'doing xTB optimization of {infile}')
-        xtb_opt = stk.XTB(
+        xtb_opt = stko.XTB(
             xtb_path=exec,
             output_dir='xtb_opt',
             opt_level='tight',
@@ -142,8 +153,16 @@ def optimize_structunit(infile, outfile, exec,
         raise NotImplementedError(f'{method} is not implemented yet.')
 
 
-def build_and_opt_cage(prefix, BB1, BB2, topology, macromod_,
-                       settings=None, pdb=None, output_dir=None):
+def build_and_opt_cage(
+    prefix,
+    BB1,
+    BB2,
+    topology,
+    macromod_,
+    settings=None,
+    pdb=None,
+    output_dir=None
+):
     """
 
     Keyword Arguments:
@@ -161,7 +180,7 @@ def build_and_opt_cage(prefix, BB1, BB2, topology, macromod_,
     # use standard settings applied in andrew_marsh work if md/settings
     # is None
     if settings is None:
-        Settings = default_stk_MD_settings()
+        Settings = default_stko_MD_settings()
     else:
         Settings = settings
 
@@ -174,7 +193,7 @@ def build_and_opt_cage(prefix, BB1, BB2, topology, macromod_,
     cage.write(prefix + '.mol')
     cage.dump(prefix + '.json')
     # restricted=True optimization with OPLS forcefield by default
-    ff = stk.MacroModelForceField(
+    ff = stko.MacroModelForceField(
         macromodel_path=macromod_,
         restricted=True,
         output_dir=output_dir
@@ -182,7 +201,7 @@ def build_and_opt_cage(prefix, BB1, BB2, topology, macromod_,
     # MD process - run MD, collect N conformers, optimize each,
     # return lowest energy conformer
     # no restricted
-    md = stk.MacroModelMD(
+    md = stko.MacroModelMD(
         macromodel_path=macromod_,
         output_dir=output_dir,
         timeout=Settings['timeout'],
@@ -196,7 +215,7 @@ def build_and_opt_cage(prefix, BB1, BB2, topology, macromod_,
         minimum_gradient=Settings['minimum_gradient'],
         use_cache=Settings['use_cache']
     )
-    macromodel = stk.OptimizerSequence(ff, md)
+    macromodel = stko.OptimizerSequence(ff, md)
     macromodel.optimize(mol=cage)
     cage.write(prefix + '_opt.mol')
     cage.dump(prefix + '_opt.json')
@@ -233,7 +252,7 @@ def MOC_collapse(
     # TODO: Add more arguments and options.
     print(f'..........doing collapser optimisation of {cage_name}')
     output_dir = f'cage_opt_{cage_name}_coll'
-    optimizer = stk.Collapser(
+    optimizer = stko.Collapser(
         output_dir,
         step_size,
         distance_cut,
@@ -265,7 +284,7 @@ def MOC_rdkit_opt(cage, cage_name, do_long):
 
     # TODO: Add more arguments and options.
     print(f'..........doing rdkit optimisation of {cage_name}')
-    optimizer = stk.MetalOptimizer(
+    optimizer = stko.MetalOptimizer(
         metal_binder_distance=1.9,
         metal_binder_fc=1.0e2,
         binder_ligand_fc=0.0,
@@ -308,7 +327,7 @@ def MOC_unres_rdkit_opt(cage, cage_name, do_long):
         '..........doing unrestricted rdkit optimisation of '
         f'{cage_name}'
     )
-    optimizer = stk.MetalOptimizer(
+    optimizer = stko.MetalOptimizer(
         metal_binder_distance=1.9,
         metal_binder_fc=1.0e2,
         binder_ligand_fc=0.0,
@@ -351,14 +370,14 @@ def MOC_uff_opt(cage, cage_name, metal_FFs, CG=False):
         print(
             f'..........doing CG UFF4MOF optimisation of {cage_name}'
         )
-        gulp_opt = stk.GulpCGMetalOptimizer(
+        gulp_opt = stko.GulpCGMetalOptimizer(
             gulp_path='/home/atarzia/software/gulp-5.1/Src/gulp/gulp',
             metal_FF=metal_FFs,
             output_dir=f'cage_opt_{cage_name}_uff'
         )
     else:
         print(f'..........doing UFF4MOF optimisation of {cage_name}')
-        gulp_opt = stk.GulpMetalOptimizer(
+        gulp_opt = stko.GulpMetalOptimizer(
             gulp_path='/home/atarzia/software/gulp-5.1/Src/gulp/gulp',
             metal_FF=metal_FFs,
             output_dir=f'cage_opt_{cage_name}_uff'
@@ -402,7 +421,7 @@ def MOC_MD_opt(
 
     # TODO: Require Exec
     print(f'..........doing UFF4MOF MD of {cage_name}')
-    gulp_MD = stk.GulpMDMetalOptimizer(
+    gulp_MD = stko.GulpMDMetalOptimizer(
         gulp_path='/home/atarzia/software/gulp-5.1/Src/gulp/gulp',
         metal_FF=metal_FFs,
         output_dir=f'cage_opt_{cage_name}_MD',
@@ -478,7 +497,7 @@ def MOC_xtb_conformers(
         opt_failed = False
         if opt:
             print(f'optimising conformer {id}')
-            xtb_opt = stk.XTB(
+            xtb_opt = stko.XTB(
                 xtb_path='/home/atarzia/software/xtb-190806/bin/xtb',
                 output_dir=f'opt_{cage_name}_{id}',
                 gfn_version=2,
@@ -496,15 +515,15 @@ def MOC_xtb_conformers(
             try:
                 xtb_opt.optimize(mol=cage)
                 cage.write(join(f'{output_dir}', f'conf_{id}_opt.xyz'))
-            except stk.XTBConvergenceError:
+            except stko.XTBConvergenceError:
                 if handle_failure:
                     opt_failed = True
                 else:
-                    raise stk.XTBConvergenceError()
+                    raise stko.XTBConvergenceError()
 
         print(f'..........calculating energy of {id} of {cage_name}')
         # Extract energy.
-        xtb_energy = stk.XTBEnergy(
+        xtb_energy = stko.XTBEnergy(
             xtb_path='/home/atarzia/software/xtb-190806/bin/xtb',
             output_dir=f'ey_{cage_name}_{id}',
             num_cores=nc,
@@ -582,7 +601,7 @@ def MOC_xtb_opt(
         solvent_str, solvent_grid = solvent
 
     print(f'..........doing XTB optimisation of {cage_name}')
-    xtb_opt = stk.XTB(
+    xtb_opt = stko.XTB(
         xtb_path='/home/atarzia/software/xtb-190806/bin/xtb',
         output_dir=f'cage_opt_{cage_name}_xtb',
         gfn_version=2,
