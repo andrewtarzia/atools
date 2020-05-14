@@ -258,7 +258,7 @@ def MOC_collapse(
         distance_cut,
         scale_steps
     )
-    optimizer.optimize(mol=cage)
+    cage = optimizer.optimize(mol=cage)
 
     return cage
 
@@ -298,7 +298,7 @@ def MOC_rdkit_opt(cage, cage_name, do_long):
         do_long_opt=do_long
     )
 
-    optimizer.optimize(mol=cage)
+    cage = optimizer.optimize(mol=cage)
 
     return cage
 
@@ -341,7 +341,7 @@ def MOC_unres_rdkit_opt(cage, cage_name, do_long):
         do_long_opt=do_long
     )
 
-    optimizer.optimize(mol=cage)
+    cage = optimizer.optimize(mol=cage)
 
     return cage
 
@@ -366,24 +366,16 @@ def MOC_uff_opt(cage, cage_name, metal_FFs, CG=False):
     """
 
     # TODO: Require Exec
-    if CG:
-        print(
-            f'..........doing CG UFF4MOF optimisation of {cage_name}'
-        )
-        gulp_opt = stko.GulpCGMetalOptimizer(
-            gulp_path='/home/atarzia/software/gulp-5.1/Src/gulp/gulp',
-            metal_FF=metal_FFs,
-            output_dir=f'cage_opt_{cage_name}_uff'
-        )
-    else:
-        print(f'..........doing UFF4MOF optimisation of {cage_name}')
-        gulp_opt = stko.GulpMetalOptimizer(
-            gulp_path='/home/atarzia/software/gulp-5.1/Src/gulp/gulp',
-            metal_FF=metal_FFs,
-            output_dir=f'cage_opt_{cage_name}_uff'
-        )
+    print(f'..........doing UFF4MOF optimisation of {cage_name}')
+    print(f'Conjugate Gradient: {CG}')
+    gulp_opt = stko.GulpMetalOptimizer(
+        gulp_path='/home/atarzia/software/gulp-5.1/Src/gulp/gulp',
+        metal_FF=metal_FFs,
+        output_dir=f'cage_opt_{cage_name}_uff',
+        conjugate_gradient=CG
+    )
     gulp_opt.assign_FF(cage)
-    gulp_opt.optimize(mol=cage)
+    cage = gulp_opt.optimize(mol=cage)
 
     return cage
 
@@ -436,7 +428,7 @@ def MOC_MD_opt(
         save_conformers=save_conf
     )
     gulp_MD.assign_FF(cage)
-    gulp_MD.optimize(cage)
+    cage = gulp_MD.optimize(cage)
 
     return cage
 
@@ -513,7 +505,7 @@ def MOC_xtb_conformers(
                 solvent_grid=solvent_grid
             )
             try:
-                xtb_opt.optimize(mol=cage)
+                cage = xtb_opt.optimize(mol=cage)
                 cage.write(join(f'{output_dir}', f'conf_{id}_opt.xyz'))
             except stko.XTBConvergenceError:
                 if handle_failure:
@@ -545,7 +537,7 @@ def MOC_xtb_conformers(
         energies.append(energy)
 
     print('done', min_energy, min_energy_conformer)
-    cage.update_from_file(min_energy_conformer)
+    cage.with_structure_from_file(min_energy_conformer)
 
     energies = [(i-min(energies))*2625.5 for i in energies]
     fig, ax = scatter_plot(
@@ -616,4 +608,4 @@ def MOC_xtb_opt(
         solvent=solvent_str,
         solvent_grid=solvent_grid
     )
-    xtb_opt.optimize(mol=cage)
+    cage = xtb_opt.optimize(mol=cage)
