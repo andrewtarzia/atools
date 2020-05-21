@@ -15,6 +15,7 @@ from os.path import exists
 import stk
 import numpy as np
 from itertools import combinations
+from mendeleev import element
 
 from .calculations import (
     get_dihedral,
@@ -1351,6 +1352,7 @@ def calculate_N_COM_N_angle(bb):
 
     # Get building block COM.
     COM_position = bb.get_center_of_mass()
+    COM_position = get_center_of_mass(bb)
 
     # Get vectors.
     fg_vectors = [i-COM_position for i in fg_positions]
@@ -1422,3 +1424,44 @@ def get_lowest_energy_conformer(bb, file_prefix, energy_type='total'):
         BB_energy = get_BB_energy(bb)
 
     return energy
+
+
+def get_center_of_mass(molecule, atom_ids=None):
+    """
+    Return the centre of mass.
+
+    Parameters
+    ----------
+    molecule : :class:`stk.Molecule`
+
+    atom_ids : :class:`iterable` of :class:`int`, optional
+        The ids of atoms which should be used to calculate the
+        center of mass. If ``None``, then all atoms will be used.
+
+    Returns
+    -------
+    :class:`numpy.ndarray`
+        The coordinates of the center of mass.
+
+    References
+    ----------
+    https://en.wikipedia.org/wiki/Center_of_mass
+
+    """
+
+    if atom_ids is None:
+        atom_ids = range(molecule.get_num_atoms())
+    elif not isinstance(atom_ids, (list, tuple)):
+        # Iterable gets used twice, once in get_atom_positions
+        # and once in zip.
+        atom_ids = list(atom_ids)
+
+    center = 0
+    total_mass = 0.
+    coords = molecule.get_atomic_positions(atom_ids)
+    atoms = molecule.get_atoms(atom_ids)
+    for atom, coord in zip(atoms, coords):
+        mass = element(atom.__class__.__name__).atomic_weight
+        total_mass += mass
+        center += mass*coord
+    return np.divide(center, total_mass)
