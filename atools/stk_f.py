@@ -63,7 +63,7 @@ class NPyridine(stk.GenericFunctionalGroup):
     Represents an N atom in pyridine functional group.
 
     The structure of the functional group is given by the pseudo-SMILES
-    ``[carbon][N][carbon]``.
+    ``[carbon][nitrogen][carbon]``.
 
     """
 
@@ -162,6 +162,154 @@ class NPyridine(stk.GenericFunctionalGroup):
         return (
             f'{self.__class__.__name__}('
             f'{self._carbon1}, {self._nitrogen}, {self._carbon2}, '
+            f'bonders={self._bonders})'
+        )
+
+
+class NTriazoleFactory(stk.FunctionalGroupFactory):
+    """
+    A subclass of stk.SmartsFunctionalGroupFactory.
+
+    """
+
+    def __init__(self, bonders=(1, ), deleters=()):
+        """
+        Initialise :class:`.NTriazoleFactory`
+
+        """
+
+        self._bonders = bonders
+        self._deleters = deleters
+
+    def get_functional_groups(self, molecule):
+        generic_functional_groups = stk.SmartsFunctionalGroupFactory(
+            smarts='[#6]~[#7X2]~[#7X2]',
+            bonders=self._bonders,
+            deleters=self._deleters
+        ).get_functional_groups(molecule)
+        for fg in generic_functional_groups:
+            atom_ids = (i.get_id() for i in fg.get_atoms())
+            atoms = tuple(molecule.get_atoms(atom_ids))
+            yield NTriazole(
+                carbon=atoms[0],
+                nitrogen1=atoms[1],
+                nitrogen2=atoms[2],
+                bonders=tuple(atoms[i] for i in self._bonders),
+                deleters=tuple(atoms[i] for i in self._deleters),
+            )
+
+
+class NTriazole(stk.GenericFunctionalGroup):
+    """
+    Represents an N atom in pyridine functional group.
+
+    The structure of the functional group is given by the pseudo-SMILES
+    ``[carbon][nitrogen][nitrogen]``.
+
+    """
+
+    def __init__(
+        self,
+        carbon,
+        nitrogen1,
+        nitrogen2,
+        bonders,
+        deleters
+    ):
+        """
+        Initialize a :class:`.Alcohol` instance.
+
+        Parameters
+        ----------
+        carbon : :class:`.C`
+            The carbon atom.
+
+        nitrogen1 : :class:`.N`
+            The first and bonding (default) nitrogen atom.
+
+        nitrogen2 : :class:`.C`
+            The second nitrogen atom.
+
+        bonders : :class:`tuple` of :class:`.Atom`
+            The bonder atoms.
+
+        deleters : :class:`tuple` of :class:`.Atom`
+            The deleter atoms.
+
+        """
+
+        self._carbon = carbon
+        self._nitrogen1 = nitrogen1
+        self._nitrogen2 = nitrogen2
+        atoms = (carbon, nitrogen1, nitrogen2)
+        super().__init__(atoms, bonders, deleters)
+
+    def get_carbon(self):
+        """
+        Get the carbon atom.
+
+        Returns
+        -------
+        :class:`.C`
+            The carbon atom.
+
+        """
+
+        return self._carbon
+
+    def get_nitrogen2(self):
+        """
+        Get the second nitrogen atom.
+
+        Returns
+        -------
+        :class:`.N`
+            The second nitrogen atom.
+
+        """
+
+        return self._nitrogen2
+
+    def get_nitrogen1(self):
+        """
+        Get the first nitrogen atom.
+
+        Returns
+        -------
+        :class:`.N`
+            The first nitrogen atom.
+
+        """
+
+        return self._nitrogen1
+
+    def clone(self):
+        clone = super().clone()
+        clone._carbon = self._carbon
+        clone._nitrogen1 = self._nitrogen1
+        clone._nitrogen2 = self._nitrogen2
+        return clone
+
+    def with_atoms(self, atom_map):
+        clone = super().with_atoms(atom_map)
+        clone._carbon = atom_map.get(
+            self._carbon.get_id(),
+            self._carbon,
+        )
+        clone._nitrogen1 = atom_map.get(
+            self._nitrogen1.get_id(),
+            self._nitrogen1,
+        )
+        clone._nitrogen2 = atom_map.get(
+            self._nitrogen2.get_id(),
+            self._nitrogen2,
+        )
+        return clone
+
+    def __repr__(self):
+        return (
+            f'{self.__class__.__name__}('
+            f'{self._carbon}, {self._nitrogen1}, {self._nitrogen2}, '
             f'bonders={self._bonders})'
         )
 
