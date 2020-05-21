@@ -546,7 +546,7 @@ def is_collapsed(topo, pore_diameter, no_window):
         return False
 
 
-def update_from_rdkit_conf(struct, mol, conf_id):
+def update_from_rdkit_conf(stk_mol, rdk_mol, conf_id):
     """
     Update the structure to match `conf_id` of `mol`.
 
@@ -554,8 +554,10 @@ def update_from_rdkit_conf(struct, mol, conf_id):
     ----------
     struct : :class:`stk.Molecule`
         The molecule whoce coordinates are to be updated.
+
     mol : :class:`rdkit.Mol`
         The :mod:`rdkit` molecule to use for the structure update.
+
     conf_id : :class:`int`
         The conformer ID of the `mol` to update from.
 
@@ -566,9 +568,8 @@ def update_from_rdkit_conf(struct, mol, conf_id):
 
     """
 
-    pos_mat = mol.GetConformer(id=conf_id).GetPositions()
-    struct.set_position_matrix(pos_mat)
-    return struct
+    pos_mat = rdk_mol.GetConformer(id=conf_id).GetPositions()
+    return stk_mol.with_position_matrix(pos_mat)
 
 
 def get_stk_bond_angle(mol, atom1_id, atom2_id, atom3_id):
