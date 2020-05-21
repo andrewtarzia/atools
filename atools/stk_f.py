@@ -954,7 +954,7 @@ def calculate_NN_distance(bb, constructed=False, target_BB=None):
     Calculate the N-N distance of ditopic building block.
 
     This function will not work for cages built from FGs other than
-    metals + pyridine_N_metal.
+    metals + NPyridine and metals + NTriazole.
 
     Parameters
     ----------
@@ -1014,20 +1014,20 @@ def calculate_NN_distance(bb, constructed=False, target_BB=None):
     else:
         fg_counts = 0
         N_positions = []
-        for fg in bb.func_groups:
-            if 'pyridine_N_metal' == fg.fg_type.name:
+        for fg in bb.get_functional_groups():
+            if isinstance(fg, NPyridine) or isinstance(fg, NTriazole):
                 fg_counts += 1
                 # Get geometrical properties of the FG.
                 # Get N position - deleter.
-                N_position = bb.get_center_of_mass(
-                    atom_ids=fg.get_deleter_ids()
+                N_position, = bb.get_atomic_positions(
+                    atom_ids=fg.get_nitrogen().get_id()
                 )
                 N_positions.append(N_position)
 
         if fg_counts != 2:
             raise ValueError(
-                f'{bb} does not have 2 pyridine_N_metal functional '
-                'groups.'
+                f'{bb} does not have 2 NPyridine or NTriazole '
+                'functional groups.'
             )
 
         # Calculate the angle between the two vectors.
@@ -1046,7 +1046,7 @@ def calculate_bite_angle(bb, constructed=False, target_BB=None):
     N to N vector.
 
     This function will not work for cages built from FGs other than
-    metals + pyridine_N_metal.
+    metals + NPyridine and metals + NTriazole.
 
     Parameters
     ----------
@@ -1157,18 +1157,21 @@ def calculate_bite_angle(bb, constructed=False, target_BB=None):
         fg_vectors = []
         N_positions = []
 
-        for fg in bb.func_groups:
-            if 'pyridine_N_metal' == fg.fg_type.name:
+        for fg in bb.get_functional_groups():
+            if isinstance(fg, NPyridine) or isinstance(fg, NTriazole):
                 fg_counts += 1
                 # Get geometrical properties of the FG.
-                # Get N position - deleter.
-                N_position = bb.get_center_of_mass(
-                    atom_ids=fg.get_deleter_ids()
+                # Get N position.
+                N_position, = bb.get_atomic_positions(
+                    atom_ids=fg.get_nitrogen().get_id()
                 )
                 N_positions.append(N_position)
-                # Get COM of neighbouring C atom positions - bonders.
-                CC_MP = bb.get_center_of_mass(
-                    atom_ids=fg.get_bonder_ids()
+                # Get centroid of neighbouring C atom positions.
+                CC_MP = bb.get_centroid(
+                    atom_ids=(
+                        fg.get_carbon1().get_id(),
+                        fg.get_carbon2().get_id()
+                    )
                 )
                 # Get vector between COM and N position.
                 v = N_position - CC_MP
@@ -1318,7 +1321,7 @@ def calculate_N_COM_N_angle(bb):
     Calculate the N-COM-N angle of a ditopic building block.
 
     This function will not work for cages built from FGs other than
-    metals + pyridine_N_metal.
+    metals + NPyridine and metals + NTriazole.
 
     Parameters
     ----------
@@ -1334,24 +1337,23 @@ def calculate_N_COM_N_angle(bb):
 
     fg_counts = 0
     fg_positions = []
-    for fg in bb.func_groups:
-        if 'pyridine_N_metal' == fg.fg_type.name:
+    for fg in bb.get_functional_groups():
+        if isinstance(fg, NPyridine) or isinstance(fg, NTriazole):
             fg_counts += 1
             # Get geometrical properties of the FG.
             # Get N position - deleter.
-            N_position = bb.get_center_of_mass(
-                atom_ids=fg.get_deleter_ids()
+            N_position, = bb.get_atomic_positions(
+                atom_ids=fg.get_nitrogen().get_id()
             )
             fg_positions.append(N_position)
 
     if fg_counts != 2:
         raise ValueError(
-            f'{bb} does not have 2 pyridine_N_metal functional '
+            f'{bb} does not have 2 NPyridine or NTriazole functional '
             'groups.'
         )
 
     # Get building block COM.
-    COM_position = bb.get_center_of_mass()
     COM_position = get_center_of_mass(bb)
 
     # Get vectors.
