@@ -193,7 +193,7 @@ class NTriazoleFactory(stk.FunctionalGroupFactory):
             atoms = tuple(molecule.get_atoms(atom_ids))
             yield NTriazole(
                 carbon=atoms[0],
-                nitrogen1=atoms[1],
+                nitrogen=atoms[1],
                 nitrogen2=atoms[2],
                 bonders=tuple(atoms[i] for i in self._bonders),
                 deleters=tuple(atoms[i] for i in self._deleters),
@@ -212,7 +212,7 @@ class NTriazole(stk.GenericFunctionalGroup):
     def __init__(
         self,
         carbon,
-        nitrogen1,
+        nitrogen,
         nitrogen2,
         bonders,
         deleters
@@ -225,7 +225,7 @@ class NTriazole(stk.GenericFunctionalGroup):
         carbon : :class:`.C`
             The carbon atom.
 
-        nitrogen1 : :class:`.N`
+        nitrogen : :class:`.N`
             The first and bonding (default) nitrogen atom.
 
         nitrogen2 : :class:`.C`
@@ -240,9 +240,9 @@ class NTriazole(stk.GenericFunctionalGroup):
         """
 
         self._carbon = carbon
-        self._nitrogen1 = nitrogen1
+        self._nitrogen = nitrogen
         self._nitrogen2 = nitrogen2
-        atoms = (carbon, nitrogen1, nitrogen2)
+        atoms = (carbon, nitrogen, nitrogen2)
         super().__init__(atoms, bonders, deleters)
 
     def get_carbon(self):
@@ -271,7 +271,7 @@ class NTriazole(stk.GenericFunctionalGroup):
 
         return self._nitrogen2
 
-    def get_nitrogen1(self):
+    def get_nitrogen(self):
         """
         Get the first nitrogen atom.
 
@@ -282,12 +282,12 @@ class NTriazole(stk.GenericFunctionalGroup):
 
         """
 
-        return self._nitrogen1
+        return self._nitrogen
 
     def clone(self):
         clone = super().clone()
         clone._carbon = self._carbon
-        clone._nitrogen1 = self._nitrogen1
+        clone._nitrogen = self._nitrogen
         clone._nitrogen2 = self._nitrogen2
         return clone
 
@@ -297,9 +297,9 @@ class NTriazole(stk.GenericFunctionalGroup):
             self._carbon.get_id(),
             self._carbon,
         )
-        clone._nitrogen1 = atom_map.get(
-            self._nitrogen1.get_id(),
-            self._nitrogen1,
+        clone._nitrogen = atom_map.get(
+            self._nitrogen.get_id(),
+            self._nitrogen,
         )
         clone._nitrogen2 = atom_map.get(
             self._nitrogen2.get_id(),
@@ -310,7 +310,7 @@ class NTriazole(stk.GenericFunctionalGroup):
     def __repr__(self):
         return (
             f'{self.__class__.__name__}('
-            f'{self._carbon}, {self._nitrogen1}, {self._nitrogen2}, '
+            f'{self._carbon}, {self._nitrogen}, {self._nitrogen2}, '
             f'bonders={self._bonders})'
         )
 
