@@ -16,6 +16,8 @@ import stk
 import numpy as np
 from itertools import combinations
 from mendeleev import element
+import networkx as nx
+from scipy.spatial.distance import euclidean
 
 from .calculations import (
     get_dihedral,
@@ -315,113 +317,6 @@ class NTriazole(stk.GenericFunctionalGroup):
         )
 
 
-def build_ABCBA(core, liga, link, flippedlink=False):
-    """
-    Build ABCBA ligand using linear stk polymer.
-
-    Polymer structure:
-        ligand -- linker -- core -- linker -- ligand
-
-    Parameters
-    ----------
-    core : :class:`stk.BuildingBlock`
-        The molecule to use as core.
-    liga : :class:`stk.BuildingBlock`
-        The molecule to use as ligand.
-    link : :class:`stk.BuildingBlock`
-        The molecule to use as linker.
-    flippedlink : :class:`bool`
-        `True` to flip the linker molecules. Defaults to `False`.
-
-    Returns
-    -------
-    polymer : :class:`stk.ConstructedMolecule`
-        Built molecule pre optimisation.
-
-    """
-    if flippedlink is False:
-        orientation = (0, 0, 0, 1, 1)
-    elif flippedlink is True:
-        orientation = (0, 1, 0, 0, 1)
-    polymer = stk.ConstructedMolecule(
-        building_blocks=[liga, link, core],
-        topology_graph=stk.polymer.Linear(
-            repeating_unit='ABCBA',
-            num_repeating_units=1,
-            orientations=orientation,
-            num_processes=1
-        )
-    )
-    return polymer
-
-
-def build_ABA(core, liga):
-    """
-    Build ABA ligand using linear stk.Polymer().
-
-    Polymer structure:
-        ligand -- core -- ligand
-
-    Parameters
-    ----------
-    core : :class:`stk.BuildingBlock`
-        The molecule to use as core.
-    liga : :class:`stk.BuildingBlock`
-        The molecule to use as ligand.
-
-    Returns
-    -------
-    polymer : :class:`stk.ConstructedMolecule`
-        Built molecule pre optimisation.
-
-    """
-    polymer = stk.ConstructedMolecule(
-        building_blocks=[liga, core],
-        topology_graph=stk.polymer.Linear(
-            repeating_unit='ABA',
-            num_repeating_units=1,
-            orientations=(0, 0, 1),
-            num_processes=1
-        )
-    )
-    return polymer
-
-
-def build_population(directory, fgs=None, suffix='.mol'):
-    """
-    Build population of BuilingBlocks from directory.
-
-    Parameters
-    ----------
-    directory : :class:`str`
-        Directory containing molecule files.
-    fgs : :class:`list` of :class:`str`
-        Functional groups of BuildingBlocks. Defaults to bromine.
-    suffix : :class:`str`
-        File suffix to use.
-
-    Returns
-    -------
-    popn : :class:`stk.Population`
-        Population of BuildingBlocks.
-
-    """
-    if fgs is None:
-        fgs = ['bromine']
-
-    mols = []
-    for file in sorted(glob(directory + '*' + suffix)):
-        mol = stk.BuildingBlock.init_from_file(
-            path=file,
-            functional_groups=fgs,
-            use_cache=False
-        )
-        mol.name = file.rstrip(suffix).replace(directory, '')
-        mols.append(mol)
-    popn = stk.Population(*mols)
-    return popn
-
-
 def topo_2_property(topology, property):
     """
     Returns properties of a topology for a given topology name.
@@ -576,13 +471,13 @@ def update_from_rdkit_conf(stk_mol, rdk_mol, conf_id):
 def get_stk_bond_angle(mol, atom1_id, atom2_id, atom3_id):
     # TODO: Fill in the doc string for this including defintiions.
     atom1_pos = np.asarray([
-        i for i in mol.get_atom_positions(atom_ids=[atom1_id])
+        i for i in mol.get_atom_positions(atom_ids=atom1_id)
     ][0])
     atom2_pos = np.asarray([
-        i for i in mol.get_atom_positions(atom_ids=[atom2_id])
+        i for i in mol.get_atom_positions(atom_ids=atom2_id)
     ][0])
     atom3_pos = np.asarray([
-        i for i in mol.get_atom_positions(atom_ids=[atom3_id])
+        i for i in mol.get_atom_positions(atom_ids=atom3_id)
     ][0])
     v1 = atom1_pos - atom2_pos
     v2 = atom3_pos - atom2_pos
@@ -693,35 +588,35 @@ def get_square_planar_distortion(mol, metal, bonder):
 
     # Find metal atoms.
     metal_atoms = []
-    for atom in mol.atoms:
-        if atom.atomic_number == metal:
+    for atom in mol.get_atoms():
+        if atom.get_atomic_number() == metal:
             metal_atoms.append(atom)
 
     # Find bonders.
     metal_bonds = []
     ids_to_metals = []
-    for bond in mol.bonds:
-        if bond.atom1 in metal_atoms:
+    for bond in mol.get_bonds():
+        if bond.get_atom1() in metal_atoms:
             metal_bonds.append(bond)
-            ids_to_metals.append(bond.atom2.id)
-        elif bond.atom2 in metal_atoms:
+            ids_to_metals.append(bond.get_atom2().get_id())
+        elif bond.get_atom2() in metal_atoms:
             metal_bonds.append(bond)
-            ids_to_metals.append(bond.atom1.id)
+            ids_to_metals.append(bond.get_atom1().get_id())
 
     # Calculate bond lengths.
     for bond in metal_bonds:
         results['bond_lengths'].append(
             mol.get_atom_distance(
-                atom1_id=bond.atom1.id,
-                atom2_id=bond.atom2.id,
+                atom1_id=bond.get_atom1().get_id(),
+                atom2_id=bond.get_atom2().get_id(),
             )
         )
 
     # Calculate bond angles.
     for bonds in combinations(metal_bonds, r=2):
         bond1, bond2 = bonds
-        bond1_atoms = [bond1.atom1, bond1.atom2]
-        bond2_atoms = [bond2.atom1, bond2.atom2]
+        bond1_atoms = [bond1.get_atom1(), bond1.get_atom2()]
+        bond2_atoms = [bond2.get_atom1(), bond2.get_atom2()]
         pres_atoms = list(set(bond1_atoms + bond2_atoms))
         # If there are more than 3 atoms, implies two
         # independant bonds.
@@ -729,11 +624,11 @@ def get_square_planar_distortion(mol, metal, bonder):
             continue
         for atom in pres_atoms:
             if atom in bond1_atoms and atom in bond2_atoms:
-                idx2 = atom.id
+                idx2 = atom.get_id()
             elif atom in bond1_atoms:
-                idx1 = atom.id
+                idx1 = atom.get_id()
             elif atom in bond2_atoms:
-                idx3 = atom.id
+                idx3 = atom.get_id()
 
         angle = np.degrees(get_stk_bond_angle(
             mol=mol,
@@ -748,10 +643,10 @@ def get_square_planar_distortion(mol, metal, bonder):
     for metal_atom in metal_atoms:
         torsion_ids = []
         for bond in metal_bonds:
-            if metal_atom.id == bond.atom1.id:
-                torsion_ids.append(bond.atom2.id)
-            elif metal_atom.id == bond.atom2.id:
-                torsion_ids.append(bond.atom1.id)
+            if metal_atom.get_id() == bond.get_atom1().get_id():
+                torsion_ids.append(bond.get_atom2().get_id())
+            elif metal_atom.get_id() == bond.get_atom2().get_id():
+                torsion_ids.append(bond.get_atom1().get_id())
         atom_positions = [
             i for i in mol.get_atom_positions(atom_ids=torsion_ids)
         ]
@@ -759,12 +654,12 @@ def get_square_planar_distortion(mol, metal, bonder):
 
     # Calculate deviation of metal from bonder plane.
     for metal_atom in metal_atoms:
-        binder_atom_ids = [metal_atom.id]
+        binder_atom_ids = [metal_atom.get_id()]
         for bond in metal_bonds:
-            if metal_atom.id == bond.atom1.id:
-                binder_atom_ids.append(bond.atom2.id)
-            elif metal_atom.id == bond.atom2.id:
-                binder_atom_ids.append(bond.atom1.id)
+            if metal_atom.get_id() == bond.get_atom1().get_id():
+                binder_atom_ids.append(bond.get_atom2().get_id())
+            elif metal_atom.get_id() == bond.get_atom2().get_id():
+                binder_atom_ids.append(bond.get_atom1().get_id())
         centroid = mol.get_centroid(atom_ids=binder_atom_ids)
         normal = mol.get_plane_normal(atom_ids=binder_atom_ids)
         # Plane of equation ax + by + cz = d.
@@ -786,13 +681,15 @@ def get_square_planar_distortion(mol, metal, bonder):
     for metal_atom in metal_atoms:
         plane_angles = []
         # Get metal position.
-        metal_position = mol.get_centroid(atom_ids=[metal_atom.id])
+        metal_position = mol.get_centroid(
+            atom_ids=[metal_atom.get_id()]
+        )
         # Iterate over metal bonds.
         for bond in metal_bonds:
-            if metal_atom.id == bond.atom1.id:
-                N_atom_id = bond.atom2.id
-            elif metal_atom.id == bond.atom2.id:
-                N_atom_id = bond.atom1.id
+            if metal_atom.get_id() == bond.get_atom1().get_id():
+                N_atom_id = bond.get_atom2().get_id()
+            elif metal_atom.get_id() == bond.get_atom2().get_id():
+                N_atom_id = bond.get_atom1().get_id()
             else:
                 continue
             # Get MN vector.
@@ -800,13 +697,16 @@ def get_square_planar_distortion(mol, metal, bonder):
             MN_vector = N_position - metal_position
             # Get CNC atom ids.
             CNC_atom_ids = [N_atom_id]
-            for bond in mol.bonds:
-                if metal_atom.id in [bond.atom1.id, bond.atom2.id]:
+            for bond in mol.get_bonds():
+                if metal_atom.get_id() in [
+                    bond.get_atom1().get_id(),
+                    bond.get_atom2().get_id()
+                ]:
                     continue
-                if bond.atom1.id == N_atom_id:
-                    CNC_atom_ids.append(bond.atom2.id)
-                elif bond.atom2.id == N_atom_id:
-                    CNC_atom_ids.append(bond.atom1.id)
+                if bond.get_atom1().get_id() == N_atom_id:
+                    CNC_atom_ids.append(bond.get_atom2().get_id())
+                elif bond.get_atom2().get_id() == N_atom_id:
+                    CNC_atom_ids.append(bond.get_atom1().get_id())
 
             # Get CNC plane.
             centroid = mol.get_centroid(atom_ids=CNC_atom_ids)
@@ -1136,7 +1036,7 @@ def calculate_bite_angle(bb, constructed=False, target_BB=None):
 
             if fg_counts < 2:
                 raise ValueError(
-                    f'{bb} does not have 2 pyridine_N_metal '
+                    f'{bb} does not have 2 NPyridine '
                     'functional groups.'
                 )
             # Get N to N vector.
@@ -1179,8 +1079,8 @@ def calculate_bite_angle(bb, constructed=False, target_BB=None):
 
         if fg_counts != 2:
             raise ValueError(
-                f'{bb} does not have 2 pyridine_N_metal functional '
-                'groups.'
+                f'{bb} does not have exactly 2 NPyridine or NTriazole '
+                'functional groups.'
             )
 
         # Get N to N vector.
@@ -1195,6 +1095,34 @@ def calculate_bite_angle(bb, constructed=False, target_BB=None):
         ))
         bite_angle = (angle_1 - 90) + (angle_2 - 90)
         return bite_angle
+
+
+def get_furthest_pair_FGs(stk_mol):
+    """
+    Returns the pair of functional groups that are furthest apart.
+
+    """
+
+    if stk_mol.get_num_functional_groups() == 2:
+        return tuple(i for i in stk_mol.get_functional_groups())
+    elif stk_mol.get_num_functional_groups() < 2:
+        raise ValueError(f'{stk_mol} does not have at least 2 FGs')
+
+    fg_centroids = [
+        (fg, stk_mol.get_centroid(atom_ids=fg.get_placer_ids()))
+        for fg in stk_mol.get_functional_groups()
+    ]
+
+    fg_dists = sorted(
+        [
+            (i[0], j[0], euclidean(i[1], j[1]))
+            for i, j in combinations(fg_centroids, 2)
+        ],
+        key=lambda x: x[2],
+        reverse=True
+    )
+
+    return (fg_dists[0][0], fg_dists[0][1])
 
 
 def filter_pyridine_FGs(mol):
