@@ -470,15 +470,9 @@ def update_from_rdkit_conf(stk_mol, rdk_mol, conf_id):
 
 def get_stk_bond_angle(mol, atom1_id, atom2_id, atom3_id):
     # TODO: Fill in the doc string for this including defintiions.
-    atom1_pos = np.asarray([
-        i for i in mol.get_atom_positions(atom_ids=atom1_id)
-    ][0])
-    atom2_pos = np.asarray([
-        i for i in mol.get_atom_positions(atom_ids=atom2_id)
-    ][0])
-    atom3_pos = np.asarray([
-        i for i in mol.get_atom_positions(atom_ids=atom3_id)
-    ][0])
+    atom1_pos, = mol.get_atomic_positions(atom_ids=atom1_id)
+    atom2_pos, = mol.get_atomic_positions(atom_ids=atom2_id)
+    atom3_pos, = mol.get_atomic_positions(atom_ids=atom3_id)
     v1 = atom1_pos - atom2_pos
     v2 = atom3_pos - atom2_pos
     return stk.vector_angle(v1, v2)
@@ -802,8 +796,10 @@ def calculate_ligand_energy(
     constructed=False,
     target_BB=None
 ):
+def get_center_of_mass(molecule, atom_ids=None):
     """
     Calculate the ligand energy of bb.
+    Return the centre of mass.
 
     Parameters
     ----------
@@ -814,8 +810,12 @@ def calculate_ligand_energy(
         `True` if bb is part of a ConstructedMolecule.
         Is so, Calculates the strain energy for all relavent building
         blocks.
+    molecule : :class:`stk.Molecule`
 
     target_BB
+    atom_ids : :class:`iterable` of :class:`int`, optional
+        The ids of atoms which should be used to calculate the
+        center of mass. If ``None``, then all atoms will be used.
 
     Returns
     -------
@@ -825,12 +825,18 @@ def calculate_ligand_energy(
         Units: kJ/mol.
 
     """
+    :class:`numpy.ndarray`
+        The coordinates of the center of mass.
 
     if constructed:
         target_bb_ids = get_target_bb_ids(bb, target_BB)
+    References
+    ----------
+    https://en.wikipedia.org/wiki/Center_of_mass
 
         # Only get properties if BB matches target_BB
         # (collect all if target_BB is None).
+    """
 
         # Get BB coordinates and bonds for each target_bb_id.
         BB_properties = []
@@ -847,7 +853,22 @@ def calculate_ligand_energy(
         BB_energy = get_BB_energy(bb)
         BB_energies = [BB_energy]
         return BB_energies
+    if atom_ids is None:
+        atom_ids = range(molecule.get_num_atoms())
+    elif not isinstance(atom_ids, (list, tuple)):
+        # Iterable gets used twice, once in get_atom_positions
+        # and once in zip.
+        atom_ids = list(atom_ids)
 
+    center = 0
+    total_mass = 0.
+    coords = molecule.get_atomic_positions(atom_ids)
+    atoms = molecule.get_atoms(atom_ids)
+    for atom, coord in zip(atoms, coords):
+        mass = element(atom.__class__.__name__).atomic_weight
+        total_mass += mass
+        center += mass*coord
+    return np.divide(center, total_mass)
 
 def calculate_NN_distance(bb, constructed=False, target_BB=None):
     """
@@ -855,23 +876,33 @@ def calculate_NN_distance(bb, constructed=False, target_BB=None):
 
     This function will not work for cages built from FGs other than
     metals + NPyridine and metals + NTriazole.
+def get_atom_distance(molecule, atom1_id, atom2_id):
+    """
+    Return the distance between atom1 and atom2.
 
     Parameters
     ----------
     bb : :class:`stk.BuildingBlock`
         stk molecule to analyse.
+    molecule : :class:`stk.Molecule`
 
     constructed : :class:`bool`
         `True` if bb is part of a ConstructedMolecule.
         Is so, Calculates the NN distance for all relavent building
         blocks.
+    atom1_id : :class:`int`
+        The id of atom1.
 
     target_BB
+    atom2_id : :class:`int`
+        The id of atom2.
 
     Returns
     -------
     NN_distance : :class:`float` or :class:`list` of :class:`float`
         Distance(s) between [angstrom] deleters in functional groups.
+    :class:`float`
+        The euclidean distance between two atoms.
 
     """
 
@@ -933,7 +964,12 @@ def calculate_NN_distance(bb, constructed=False, target_BB=None):
         # Calculate the angle between the two vectors.
         NN_distance = np.linalg.norm(N_positions[0] - N_positions[1])
         return NN_distance
+    position_matrix = molecule.get_position_matrix()
 
+    distance = euclidean(
+        u=position_matrix[atom1_id],
+        v=position_matrix[atom2_id]
+    )
 
 def calculate_bite_angle(bb, constructed=False, target_BB=None):
     """
@@ -941,6 +977,7 @@ def calculate_bite_angle(bb, constructed=False, target_BB=None):
 
     Here the bite angle is defined `visually` as in:
         https://doi.org/10.1016/j.ccr.2018.06.010
+    return float(distance)
 
     It is calculated using the angles between binding vectors and the
     N to N vector.
