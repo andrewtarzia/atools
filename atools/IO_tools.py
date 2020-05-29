@@ -20,6 +20,19 @@ from pymatgen.io.cif import CifParser
 import re
 
 
+def read_gfnx2xtb_eyfile(file):
+    """
+    Read the energy (kJ/mol from GFN2-xTB) from a .ey file.
+
+    """
+
+    with open(file, 'r') as f:
+        lines = f.readlines()
+        ey = float(lines[0].rstrip())
+
+    return ey*2625.5
+
+
 def replace(string, substitutions):
     """
     Replace multiple substrings.

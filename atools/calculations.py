@@ -184,6 +184,7 @@ def shortest_distance_to_plane(plane, point):
     Calculate the perpendicular distance beween a point and a plane.
 
     """
+
     top = abs(
         plane[0]*point[0] + plane[1]*point[1] +
         plane[2]*point[2] - plane[3]
