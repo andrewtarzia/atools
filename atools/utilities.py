@@ -55,5 +55,4 @@ def build_conformers(mol, N):
         useBasicKnowledge=True
     )
     print(f'there are {molecule.GetNumConformers()} conformers')
-    input()
     return cids, molecule

@@ -100,12 +100,20 @@ def calculate_bite_angle(bb):
             )
             N_positions.append(N_position)
             # Get centroid of neighbouring C atom positions.
-            CC_MP = bb.get_centroid(
-                atom_ids=(
-                    fg.get_carbon1().get_id(),
-                    fg.get_carbon2().get_id()
+            if isinstance(fg, NPyridine):
+                CC_MP = bb.get_centroid(
+                    atom_ids=(
+                        fg.get_carbon1().get_id(),
+                        fg.get_carbon2().get_id()
+                    )
                 )
-            )
+            elif isinstance(fg, NTriazole):
+                CC_MP = bb.get_centroid(
+                    atom_ids=(
+                        fg.get_carbon().get_id(),
+                        fg.get_nitrogen2().get_id()
+                    )
+                )
             # Get vector between COM and N position.
             v = N_position - CC_MP
             fg_vectors.append(v)

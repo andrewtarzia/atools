@@ -485,7 +485,7 @@ def MOC_xtb_conformers(
     min_energy = 10E20
     for file in sorted(conformers):
         id = file.replace('.xyz', '').split('_')[-1]
-        cage.update_from_file(file)
+        cage = cage.with_structure_from_file(file)
         opt_failed = False
         if opt:
             print(f'optimising conformer {id}')
@@ -537,7 +537,7 @@ def MOC_xtb_conformers(
         energies.append(energy)
 
     print('done', min_energy, min_energy_conformer)
-    cage.with_structure_from_file(min_energy_conformer)
+    cage = cage.with_structure_from_file(min_energy_conformer)
 
     energies = [(i-min(energies))*2625.5 for i in energies]
     fig, ax = scatter_plot(
@@ -555,6 +555,8 @@ def MOC_xtb_conformers(
         bbox_inches='tight'
     )
     plt.close()
+
+    return cage
 
 
 def MOC_xtb_opt(
@@ -609,6 +611,8 @@ def MOC_xtb_opt(
         solvent_grid=solvent_grid
     )
     cage = xtb_opt.optimize(mol=cage)
+
+    return cage
 
 
 def optimize_conformer(
