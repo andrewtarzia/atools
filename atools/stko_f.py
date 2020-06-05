@@ -249,7 +249,6 @@ def MOC_collapse(
 
     """
 
-    # TODO: Add more arguments and options.
     print(f'..........doing collapser optimisation of {cage_name}')
     output_dir = f'cage_opt_{cage_name}_coll'
     optimizer = stko.Collapser(
@@ -286,10 +285,10 @@ def MOC_rdkit_opt(cage, cage_name, do_long):
     print(f'..........doing rdkit optimisation of {cage_name}')
     optimizer = stko.MetalOptimizer(
         metal_binder_distance=1.9,
-        metal_binder_fc=1.0e2,
-        binder_ligand_fc=0.0,
+        metal_binder_forceconstant=1.0e2,
+        binder_ligand_forceconstant=0.0,
         ignore_vdw=False,
-        rel_distance=None,
+        relative_distance=None,
         res_steps=50,
         restrict_bonds=True,
         restrict_angles=True,
