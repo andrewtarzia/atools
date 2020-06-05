@@ -614,6 +614,94 @@ def MOC_xtb_opt(
     return cage
 
 
+def MOC_xtb_FF_opt(
+    cage,
+    cage_name,
+    gfn_exec,
+    nc,
+    opt_level,
+    charge,
+):
+    """
+    Perform GFN-FF-xTB optimisation of MOC.
+
+    Parameters
+    ----------
+    cage : :class:`stk.Molecule`
+        Cage to be optimised.
+
+    cage_name : :class:`str`
+        Name of cage.
+
+    Returns
+    -------
+    cage : :class:`stk.Molecule`
+        Optimised cage.
+
+    """
+
+    print(f'..........doing GFN-FF optimisation of {cage_name}')
+    xtb_ff_opt = stko.XTBFF(
+        xtb_path=gfn_exec,
+        output_dir=f'cage_opt_{cage_name}_xtbff',
+        num_cores=nc,
+        opt_level=opt_level,
+        charge=charge,
+        unlimited_memory=True,
+    )
+    cage = xtb_ff_opt.optimize(mol=cage)
+
+    return cage
+
+
+def MOC_xtb_FFCREST_opt(
+    cage,
+    cage_name,
+    gfn_exec,
+    crest_exec,
+    nc,
+    opt_level,
+    ewin,
+    charge,
+    keepdir,
+    speed_setting,
+):
+    """
+    Perform GFN2-xTB optimisation of MOC.
+
+    Parameters
+    ----------
+    cage : :class:`stk.ConstructedMolecule`
+        Cage to be optimised.
+
+    cage_name : :class:`str`
+        Name of cage.
+
+    Returns
+    -------
+    cage : :class:`stk.ConstructedMolecule`
+        Optimised cage.
+
+    """
+
+    print(f'..........doing GFN-FF CREST optimisation of {cage_name}')
+    xtb_ff_crest = stko.XTBFFCREST(
+        crest_path=crest_exec,
+        xtb_path=gfn_exec,
+        output_dir=f'cage_opt_{cage_name}_xtbffcrest',
+        num_cores=nc,
+        ewin=ewin,
+        opt_level=opt_level,
+        charge=charge,
+        keepdir=keepdir,
+        speed_setting=speed_setting,
+        unlimited_memory=True,
+    )
+    cage = xtb_ff_crest.optimize(mol=cage)
+
+    return cage
+
+
 def optimize_conformer(
     name,
     mol,
