@@ -20,6 +20,7 @@ from .stko_f import calculate_energy
 from .ligand_calculations import (
     calculate_bite_angle,
     calculate_NN_distance,
+    get_furthest_pair_FGs,
 )
 
 
@@ -207,18 +208,23 @@ def calculate_deltaangle_distance(
         else:
             filename_ = f'{file_prefix}{sgt}_{idx}_opt.mol'
 
-        angle_in_cage = calculate_bite_angle(
-            bb=stk.BuildingBlock.init_from_molecule(
-                stk_lig,
-                functional_groups=fg_factory
-            )
+        _in_cage = stk.BuildingBlock.init_from_molecule(
+            stk_lig,
+            functional_groups=fg_factory
         )
-        angle_free = calculate_bite_angle(
-            bb=stk.BuildingBlock.init_from_file(
-                filename_,
-                functional_groups=fg_factory
-            )
+        _in_cage = _in_cage.with_functional_groups(
+            functional_groups=get_furthest_pair_FGs(_in_cage)
         )
+
+        _free = stk.BuildingBlock.init_from_file(
+            filename_,
+            functional_groups=fg_factory
+        )
+        _free = _free.with_functional_groups(
+            functional_groups=get_furthest_pair_FGs(_free)
+        )
+        angle_in_cage = calculate_bite_angle(bb=_in_cage)
+        angle_free = calculate_bite_angle(bb=_free)
 
         delta_angles[lig] = abs(angle_in_cage - angle_free)
 
@@ -280,18 +286,24 @@ def calculate_deltann_distance(
         else:
             filename_ = f'{file_prefix}{sgt}_{idx}_opt.mol'
 
-        nn_in_cage = calculate_NN_distance(
-            bb=stk.BuildingBlock.init_from_molecule(
-                stk_lig,
-                functional_groups=fg_factory
-            )
+        _in_cage = stk.BuildingBlock.init_from_molecule(
+            stk_lig,
+            functional_groups=fg_factory
         )
-        nn_free = calculate_NN_distance(
-            bb=stk.BuildingBlock.init_from_file(
-                filename_,
-                functional_groups=fg_factory
-            )
+        _in_cage = _in_cage.with_functional_groups(
+            functional_groups=get_furthest_pair_FGs(_in_cage)
         )
+
+        _free = stk.BuildingBlock.init_from_file(
+            filename_,
+            functional_groups=fg_factory
+        )
+        _free = _free.with_functional_groups(
+            functional_groups=get_furthest_pair_FGs(_free)
+        )
+
+        nn_in_cage = calculate_NN_distance(bb=_in_cage)
+        nn_free = calculate_NN_distance(bb=_free)
 
         delta_nns[lig] = abs(nn_in_cage - nn_free)
 
