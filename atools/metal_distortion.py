@@ -244,6 +244,7 @@ def get_order_values(mol, metal, per_site=False):
         site_idxs=sites,
         neigh_idxs=neighs
     )
+
     if per_site:
         results = order_values
         return results
