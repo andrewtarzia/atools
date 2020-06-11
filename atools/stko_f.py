@@ -661,10 +661,12 @@ def MOC_xtb_FFCREST_opt(
     crest_exec,
     nc,
     opt_level,
-    ewin,
     charge,
     keepdir,
-    speed_setting,
+    cross,
+    md_len=None,
+    ewin=5,
+    speed_setting=None,
 ):
     """
     Perform GFN2-xTB optimisation of MOC.
@@ -694,7 +696,9 @@ def MOC_xtb_FFCREST_opt(
         opt_level=opt_level,
         charge=charge,
         keepdir=keepdir,
+        cross=cross,
         speed_setting=speed_setting,
+        md_len=md_len,
         unlimited_memory=True,
     )
     cage = xtb_ff_crest.optimize(mol=cage)
