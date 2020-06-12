@@ -10,12 +10,10 @@ Author: Andrew Tarzia
 Date Created: 15 Mar 2019
 """
 
-import os
 from os.path import exists
 from stk import BuildingBlock
 from ase.io import read
 from ase.io.xyz import write_xyz
-import pymatgen as pmg
 from pymatgen.io.cif import CifParser
 import re
 
@@ -57,28 +55,6 @@ def replace(string, substitutions):
     return regex.sub(
         lambda match: substitutions[match.group(0)], string
     )
-
-
-def convert_stk_to_pymatgen(stk_mol):
-    """
-    Convert stk.Molecule to pymatgen.Molecule.
-
-    Parameters
-    ----------
-    stk_mol : :class:`stk.Molecule`
-        Stk molecule to convert.
-
-    Returns
-    -------
-    pmg_mol : :class:`pymatgen.Molecule`
-        Corresponding pymatgen Molecule.
-
-    """
-    stk_mol.write('temp.xyz')
-    pmg_mol = pmg.Molecule.from_file('temp.xyz')
-    os.system('rm temp.xyz')
-
-    return pmg_mol
 
 
 def convert_MOL3000_2_PDB_XYZ(file):

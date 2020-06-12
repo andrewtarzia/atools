@@ -18,8 +18,10 @@ from .calculations import (
     shortest_distance_to_plane,
     angle_between
 )
-from .pymatgen_f import calculate_sites_order_values
-from .IO_tools import convert_stk_to_pymatgen
+from .pymatgen_f import (
+    calculate_sites_order_values,
+    convert_stk_to_pymatgen
+)
 from .stk_f import get_atom_distance, get_stk_bond_angle
 
 

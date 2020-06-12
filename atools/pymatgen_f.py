@@ -11,10 +11,34 @@ Date Created: 30 Jan 2020
 
 """
 
+import os
+import pymatgen as pmg
 from pymatgen.analysis.local_env import (
     LocalStructOrderParams,
 )
 from pymatgen.core import Specie
+
+
+def convert_stk_to_pymatgen(stk_mol):
+    """
+    Convert stk.Molecule to pymatgen.Molecule.
+
+    Parameters
+    ----------
+    stk_mol : :class:`stk.Molecule`
+        Stk molecule to convert.
+
+    Returns
+    -------
+    pmg_mol : :class:`pymatgen.Molecule`
+        Corresponding pymatgen Molecule.
+
+    """
+    stk_mol.write('temp.xyz')
+    pmg_mol = pmg.Molecule.from_file('temp.xyz')
+    os.system('rm temp.xyz')
+
+    return pmg_mol
 
 
 def get_element_sites(molecule, atomic_no):
