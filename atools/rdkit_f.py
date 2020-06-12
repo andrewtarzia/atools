@@ -46,7 +46,11 @@ def draw_mol_to_svg(mol, filename):
     new_mol = Chem.MolFromMolBlock(Chem.MolToMolBlock(mol))
     Chem.Compute2DCoords(new_mol)
     Draw.MolToFile(
-        new_mol, filename, fitImage=True, imageType='svg', options=o
+        new_mol,
+        filename,
+        fitImage=True,
+        imageType='svg',
+        options=o
     )
 
 
