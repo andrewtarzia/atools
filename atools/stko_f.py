@@ -441,6 +441,7 @@ def MOC_xtb_conformers(
     nc,
     free_e,
     charge,
+    gfn_exec=None,
     opt=False,
     opt_level=None,
     solvent=None,
@@ -464,7 +465,9 @@ def MOC_xtb_conformers(
 
     """
 
-    # TODO: Require Exec
+    if gfn_exec is None:
+        gfn_exec = '/home/atarzia/software/xtb-190806/bin/xtb'
+
     if not exists(output_dir):
         os.mkdir(output_dir)
 
@@ -489,7 +492,7 @@ def MOC_xtb_conformers(
         if opt:
             print(f'optimising conformer {id}')
             xtb_opt = stko.XTB(
-                xtb_path='/home/atarzia/software/xtb-190806/bin/xtb',
+                xtb_path=gfn_exec,
                 output_dir=f'opt_{cage_name}_{id}',
                 gfn_version=2,
                 num_cores=nc,
@@ -515,7 +518,7 @@ def MOC_xtb_conformers(
         print(f'..........calculating energy of {id} of {cage_name}')
         # Extract energy.
         xtb_energy = stko.XTBEnergy(
-            xtb_path='/home/atarzia/software/xtb-190806/bin/xtb',
+            xtb_path=gfn_exec,
             output_dir=f'ey_{cage_name}_{id}',
             num_cores=nc,
             charge=charge,
@@ -566,6 +569,7 @@ def MOC_xtb_opt(
     etemp,
     charge,
     free_e,
+    gfn_exec=None,
     solvent=None
 ):
     """
@@ -586,7 +590,9 @@ def MOC_xtb_opt(
 
     """
 
-    # TODO: Require Exec
+    if gfn_exec is None:
+        gfn_exec = '/home/atarzia/software/xtb-190806/bin/xtb'
+
     if solvent is None:
         solvent_str = None
         solvent_grid = 'normal'
@@ -595,7 +601,7 @@ def MOC_xtb_opt(
 
     print(f'..........doing XTB optimisation of {cage_name}')
     xtb_opt = stko.XTB(
-        xtb_path='/home/atarzia/software/xtb-190806/bin/xtb',
+        xtb_path=gfn_exec,
         output_dir=f'cage_opt_{cage_name}_xtb',
         gfn_version=2,
         num_cores=nc,
