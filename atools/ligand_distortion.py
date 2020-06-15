@@ -22,6 +22,8 @@ from .ligand_calculations import (
     calculate_NN_distance,
     get_furthest_pair_FGs,
 )
+from .rdkit_f import get_query_atom_ids
+from .calculations import get_dihedral
 
 
 def calculate_ligand_SE(
@@ -121,19 +123,44 @@ def calculate_ligand_SE(
     return strain_energies
 
 
-def calculate_imine_torsions(org_ligs):
+def calculate_abs_imine_torsions(org_ligs):
     """
     Calculate the imine torsion of all ligands in the cage.
 
     """
 
-    # Iterate over each ligand and find imines.
+    torsions = {}
+    # Iterate over ligands.
+    for lig in org_ligs:
+        stk_lig = org_ligs[lig]
+        print(lig)
+        # Find torsions.
+        smarts = '[#6]-[#7X2]=[#6X3H1]-[#6X3]'
+        rdkit_mol = stk_lig.to_rdkit_mol()
+        query_ids = get_query_atom_ids(smarts, rdkit_mol)
+        # Calculate torsional angle for all imines.
+        torsion_list = []
+        for atom_ids in query_ids:
+            torsion = get_dihedral(
+                pt1=tuple(
+                    stk_lig.get_atomic_positions(atom_ids[0])
+                )[0],
+                pt2=tuple(
+                    stk_lig.get_atomic_positions(atom_ids[1])
+                )[0],
+                pt3=tuple(
+                    stk_lig.get_atomic_positions(atom_ids[2])
+                )[0],
+                pt4=tuple(
+                    stk_lig.get_atomic_positions(atom_ids[3])
+                )[0]
+            )
+            torsion_list.append(abs(torsion))
 
-    # Calculate torsions.
+        # Degrees
+        torsions[lig] = torsion_list
 
-    # Save to list.
-
-    return []
+    return torsions
 
 
 def calculate_ligand_planarities(org_ligs):
