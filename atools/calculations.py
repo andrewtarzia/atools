@@ -143,6 +143,7 @@ def get_dihedral(pt1, pt2, pt3, pt4):
     (new_dihedral(p))
 
     """
+
     p0 = np.asarray(pt1)
     p1 = np.asarray(pt2)
     p2 = np.asarray(pt3)
