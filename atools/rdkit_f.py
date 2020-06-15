@@ -11,7 +11,7 @@ Date Created: 15 Mar 2019
 """
 
 import numpy as np
-from rdkit.Chem import AllChem as Chem
+from rdkit.Chem import AllChem as rdkit
 from rdkit.Chem import Descriptors, Draw
 from rdkit.Chem.Descriptors3D import NPR1, NPR2, PMI1, PMI2, PMI3
 from rdkit.Chem.Draw.MolDrawing import DrawingOptions
@@ -28,7 +28,7 @@ def calculate_all_MW(molecules):
     """
     for m, smile in molecules.items():
         # Read SMILES and add Hs
-        mol = Chem.AddHs(Chem.MolFromSmiles(smile))
+        mol = rdkit.AddHs(rdkit.MolFromSmiles(smile))
         MW = Descriptors.MolWt(mol)
         print(m, '---', smile, '---', 'MW =', MW, 'g/mol')
 
@@ -43,8 +43,8 @@ def draw_mol_to_svg(mol, filename):
     o = DrawingOptions()
     o.bgColor = None
     # Use copy of molecule to avoid changing instance of mol.
-    new_mol = Chem.MolFromMolBlock(Chem.MolToMolBlock(mol))
-    Chem.Compute2DCoords(new_mol)
+    new_mol = rdkit.MolFromMolBlock(rdkit.MolToMolBlock(mol))
+    rdkit.Compute2DCoords(new_mol)
     Draw.MolToFile(
         new_mol,
         filename,
@@ -59,7 +59,7 @@ def draw_smiles_to_svg(smiles, filename):
     Draw a single molecule to an SVG file with transparent BG.
 
     """
-    mol = Chem.MolFromSmiles(smiles)
+    mol = rdkit.MolFromSmiles(smiles)
     draw_mol_to_svg(mol, filename)
 
 
@@ -253,21 +253,49 @@ def smiles2conformers(smiles, N=10, optimize=True):
         mol (RDKit molecule ::class::) - contains N conformers
     """
     # Read SMILES and add Hs
-    mol = Chem.MolFromSmiles(smiles)
+    mol = rdkit.MolFromSmiles(smiles)
     if mol is None:
         print('RDKit error for', smiles)
         return None
-    mol = Chem.AddHs(mol)
+    mol = rdkit.AddHs(mol)
     # try based on RuntimeError from RDKit
     try:
         # 2D to 3D with multiple conformers
-        cids = Chem.EmbedMultipleConfs(mol=mol, numConfs=N,
+        cids = rdkit.EmbedMultipleConfs(mol=mol, numConfs=N,
                                        useExpTorsionAnglePrefs=True,
                                        useBasicKnowledge=True)
         # quick UFF optimize
         for cid in cids:
-            Chem.UFFOptimizeMolecule(mol, confId=cid)
+            rdkit.UFFOptimizeMolecule(mol, confId=cid)
     except RuntimeError:
         print('RDKit error for', smiles)
         return None
     return mol
+
+
+def get_query_atom_ids(query, rdkit_mol):
+    """
+    Yield the ids of atoms in `rdkit_mol` which match `query`.
+
+    Multiple substructures in `rdkit_mol` can match `query` and
+    therefore each set is yielded as a group.
+
+    Parameters
+    ----------
+    query : :class:`str`
+        A SMARTS string used to query atoms.
+
+    rdkit_mol : :class:`rdkit.Mol`
+        A molecule whose atoms should be queried.
+
+    Yields
+    ------
+    :class:`tuple` of :class:`int`
+        The ids of atoms in `molecule` which match `query`.
+
+    """
+
+    rdkit.SanitizeMol(rdkit_mol)
+    yield from rdkit_mol.GetSubstructMatches(
+        query=rdkit.MolFromSmarts(query),
+    )
