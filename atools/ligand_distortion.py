@@ -190,7 +190,7 @@ def calculate_deltaangle_distance(
     Calculate the change of bite angle of each ligand in the cage.
 
     This function will not work for cages built from FGs other than
-    metals + NPyridine and metals + NTriazole.
+    metals + AromaticCNC and metals + AromaticCNN.
 
     Parameters
     ----------
@@ -205,7 +205,7 @@ def calculate_deltaangle_distance(
     :class:`iterable` of :class:`stk.FunctionalGroupFactory`
         Functional groups to asign to molecules.
         NN_distance calculator will not work for cages built from FGs
-        other than metals + NPyridine and metals + NTriazole.
+        other than metals + AromaticCNC and metals + AromaticCNN.
 
     file_prefix : :class:`str`, optional
         Prefix to file name of each output ligand structure.
@@ -268,7 +268,7 @@ def calculate_deltann_distance(
     Calculate the change of NN distance of each ligand in the cage.
 
     This function will not work for cages built from FGs other than
-    metals + NPyridine and metals + NTriazole.
+    metals + AromaticCNC and metals + AromaticCNN.
 
     Parameters
     ----------
@@ -283,7 +283,7 @@ def calculate_deltann_distance(
     :class:`iterable` of :class:`stk.FunctionalGroupFactory`
         Functional groups to asign to molecules.
         NN_distance calculator will not work for cages built from FGs
-        other than metals + NPyridine and metals + NTriazole.
+        other than metals + AromaticCNC and metals + AromaticCNN.
 
     file_prefix : :class:`str`, optional
         Prefix to file name of each output ligand structure.

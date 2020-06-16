@@ -23,7 +23,7 @@ from .stko_f import optimize_conformer, calculate_energy
 from .utilities import build_conformers, update_from_rdkit_conf
 
 
-class NPyridineFactory(stk.FunctionalGroupFactory):
+class AromaticCNCFactory(stk.FunctionalGroupFactory):
     """
     A subclass of stk.SmartsFunctionalGroupFactory.
 
@@ -31,7 +31,7 @@ class NPyridineFactory(stk.FunctionalGroupFactory):
 
     def __init__(self, bonders=(1, ), deleters=()):
         """
-        Initialise :class:`.NPyridineFactory`
+        Initialise :class:`.AromaticCNCFactory`
 
         """
 
@@ -47,7 +47,7 @@ class NPyridineFactory(stk.FunctionalGroupFactory):
         for fg in generic_functional_groups:
             atom_ids = (i.get_id() for i in fg.get_atoms())
             atoms = tuple(molecule.get_atoms(atom_ids))
-            yield NPyridine(
+            yield AromaticCNC(
                 carbon1=atoms[0],
                 nitrogen=atoms[1],
                 carbon2=atoms[2],
@@ -56,7 +56,7 @@ class NPyridineFactory(stk.FunctionalGroupFactory):
             )
 
 
-class NPyridine(stk.GenericFunctionalGroup):
+class AromaticCNC(stk.GenericFunctionalGroup):
     """
     Represents an N atom in pyridine functional group.
 
@@ -164,7 +164,7 @@ class NPyridine(stk.GenericFunctionalGroup):
         )
 
 
-class NTriazoleFactory(stk.FunctionalGroupFactory):
+class AromaticCNNFactory(stk.FunctionalGroupFactory):
     """
     A subclass of stk.SmartsFunctionalGroupFactory.
 
@@ -172,7 +172,7 @@ class NTriazoleFactory(stk.FunctionalGroupFactory):
 
     def __init__(self, bonders=(1, ), deleters=()):
         """
-        Initialise :class:`.NTriazoleFactory`
+        Initialise :class:`.AromaticCNNFactory`
 
         """
 
@@ -188,7 +188,7 @@ class NTriazoleFactory(stk.FunctionalGroupFactory):
         for fg in generic_functional_groups:
             atom_ids = (i.get_id() for i in fg.get_atoms())
             atoms = tuple(molecule.get_atoms(atom_ids))
-            yield NTriazole(
+            yield AromaticCNN(
                 carbon=atoms[0],
                 nitrogen=atoms[1],
                 nitrogen2=atoms[2],
@@ -197,7 +197,7 @@ class NTriazoleFactory(stk.FunctionalGroupFactory):
             )
 
 
-class NTriazole(stk.GenericFunctionalGroup):
+class AromaticCNN(stk.GenericFunctionalGroup):
     """
     Represents an N atom in pyridine functional group.
 

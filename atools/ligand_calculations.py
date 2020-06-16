@@ -16,7 +16,7 @@ from itertools import combinations
 from scipy.spatial.distance import euclidean
 
 from .calculations import angle_between
-from .stk_f import NPyridine, NTriazole, get_center_of_mass
+from .stk_f import AromaticCNC, AromaticCNN, get_center_of_mass
 
 
 def calculate_NN_distance(bb):
@@ -24,7 +24,7 @@ def calculate_NN_distance(bb):
     Calculate the N-N distance of ditopic building block.
 
     This function will not work for cages built from FGs other than
-    metals + NPyridine and metals + NTriazole.
+    metals + AromaticCNC and metals + AromaticCNN.
 
     Parameters
     ----------
@@ -41,7 +41,7 @@ def calculate_NN_distance(bb):
     fg_counts = 0
     N_positions = []
     for fg in bb.get_functional_groups():
-        if isinstance(fg, NPyridine) or isinstance(fg, NTriazole):
+        if isinstance(fg, AromaticCNC) or isinstance(fg, AromaticCNN):
             fg_counts += 1
             # Get geometrical properties of the FG.
             # Get N position - deleter.
@@ -52,7 +52,7 @@ def calculate_NN_distance(bb):
 
     if fg_counts != 2:
         raise ValueError(
-            f'{bb} does not have 2 NPyridine or NTriazole '
+            f'{bb} does not have 2 AromaticCNC or AromaticCNN '
             'functional groups.'
         )
 
@@ -72,7 +72,7 @@ def calculate_bite_angle(bb):
     N to N vector.
 
     This function will not work for cages built from FGs other than
-    metals + NPyridine and metals + NTriazole.
+    metals + AromaticCNC and metals + AromaticCNN.
 
     Parameters
     ----------
@@ -91,7 +91,7 @@ def calculate_bite_angle(bb):
     N_positions = []
 
     for fg in bb.get_functional_groups():
-        if isinstance(fg, NPyridine) or isinstance(fg, NTriazole):
+        if isinstance(fg, AromaticCNC) or isinstance(fg, AromaticCNN):
             fg_counts += 1
             # Get geometrical properties of the FG.
             # Get N position.
@@ -100,14 +100,14 @@ def calculate_bite_angle(bb):
             )
             N_positions.append(N_position)
             # Get centroid of neighbouring C atom positions.
-            if isinstance(fg, NPyridine):
+            if isinstance(fg, AromaticCNC):
                 CC_MP = bb.get_centroid(
                     atom_ids=(
                         fg.get_carbon1().get_id(),
                         fg.get_carbon2().get_id()
                     )
                 )
-            elif isinstance(fg, NTriazole):
+            elif isinstance(fg, AromaticCNN):
                 CC_MP = bb.get_centroid(
                     atom_ids=(
                         fg.get_carbon().get_id(),
@@ -120,7 +120,7 @@ def calculate_bite_angle(bb):
 
     if fg_counts != 2:
         raise ValueError(
-            f'{bb} does not have exactly 2 NPyridine or NTriazole '
+            f'{bb} does not have exactly 2 AromaticCNC or AromaticCNN '
             'functional groups.'
         )
 
@@ -171,7 +171,7 @@ def calculate_N_COM_N_angle(bb):
     Calculate the N-COM-N angle of a ditopic building block.
 
     This function will not work for cages built from FGs other than
-    metals + NPyridine and metals + NTriazole.
+    metals + AromaticCNC and metals + AromaticCNN.
 
     Parameters
     ----------
@@ -188,7 +188,7 @@ def calculate_N_COM_N_angle(bb):
     fg_counts = 0
     fg_positions = []
     for fg in bb.get_functional_groups():
-        if isinstance(fg, NPyridine) or isinstance(fg, NTriazole):
+        if isinstance(fg, AromaticCNC) or isinstance(fg, AromaticCNN):
             fg_counts += 1
             # Get geometrical properties of the FG.
             # Get N position - deleter.
@@ -199,7 +199,7 @@ def calculate_N_COM_N_angle(bb):
 
     if fg_counts != 2:
         raise ValueError(
-            f'{bb} does not have 2 NPyridine or NTriazole functional '
+            f'{bb} does not have 2 AromaticCNC or AromaticCNN functional '
             'groups.'
         )
 
