@@ -512,6 +512,7 @@ def MOC_xtb_conformers(
             except stko.XTBConvergenceError:
                 if handle_failure:
                     opt_failed = True
+                    print(f'optimising conformer {id}: FAILED')
                 else:
                     raise stko.XTBConvergenceError()
 
