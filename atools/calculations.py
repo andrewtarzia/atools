@@ -117,6 +117,7 @@ def angle_between(v1, v2, normal=None):
     cross product of the two vectors.
 
     """
+
     v1_u = unit_vector(v1)
     v2_u = unit_vector(v2)
     angle = np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0))

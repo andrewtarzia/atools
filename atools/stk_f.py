@@ -716,8 +716,8 @@ def get_lowest_energy_conformer(
 
     Method:
         1) ETKDG conformer search on molecule
-        2) xTB normal optimisation of each conformer
-        3) xTB opt_level optimisation of lowest energy conformer
+        2) xTB `normal` optimisation of each conformer
+        3) xTB `opt_level` optimisation of lowest energy conformer
         4) save file
 
     """
@@ -732,7 +732,7 @@ def get_lowest_energy_conformer(
     for cid in cids:
         name_ = f'{name}_confs/c_{cid}'
         ey_file = f'{name}_confs/c_{cid}_eyout'
-        print(name, ey_file)
+
         mol = update_from_rdkit_conf(
             mol,
             confs,
@@ -765,7 +765,6 @@ def get_lowest_energy_conformer(
         if ey < low_e:
             low_e_conf_id = cid
             low_e = ey
-        print(ey, low_e, low_e_conf_id, cid)
 
     # Get lowest energy conformer.
     low_e_conf = update_from_rdkit_conf(
@@ -787,7 +786,6 @@ def get_lowest_energy_conformer(
         solvent=solvent
     )
     low_e_conf.write('temp_post_opt.mol')
-    print(low_e_conf_id)
 
     # Return molecule.
     return low_e_conf

@@ -367,7 +367,7 @@ def MOC_uff_opt(cage, cage_name, metal_FFs, CG=False):
     # TODO: Require Exec
     print(f'..........doing UFF4MOF optimisation of {cage_name}')
     print(f'Conjugate Gradient: {CG}')
-    gulp_opt = stko.GulpMetalOptimizer(
+    gulp_opt = stko.GulpUFFOptimizer(
         gulp_path='/home/atarzia/software/gulp-5.1/Src/gulp/gulp',
         metal_FF=metal_FFs,
         output_dir=f'cage_opt_{cage_name}_uff',
@@ -412,7 +412,7 @@ def MOC_MD_opt(
 
     # TODO: Require Exec
     print(f'..........doing UFF4MOF MD of {cage_name}')
-    gulp_MD = stko.GulpMDMetalOptimizer(
+    gulp_MD = stko.GulpUFFMDOptimizer(
         gulp_path='/home/atarzia/software/gulp-5.1/Src/gulp/gulp',
         metal_FF=metal_FFs,
         output_dir=f'cage_opt_{cage_name}_MD',
