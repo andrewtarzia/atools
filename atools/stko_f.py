@@ -345,7 +345,14 @@ def MOC_unres_rdkit_opt(cage, cage_name, do_long):
     return cage
 
 
-def MOC_uff_opt(cage, cage_name, metal_FFs, CG=False):
+def MOC_uff_opt(
+    cage,
+    cage_name,
+    metal_FFs,
+    CG=False,
+    maxcyc=1000,
+    gulp_exec=None,
+):
     """
     Perform UFF4MOF optimisation of MOC.
 
@@ -364,11 +371,14 @@ def MOC_uff_opt(cage, cage_name, metal_FFs, CG=False):
 
     """
 
-    # TODO: Require Exec
+    if gulp_exec is None:
+        gulp_exec = '/home/atarzia/software/gulp-5.1/Src/gulp/gulp'
+
     print(f'..........doing UFF4MOF optimisation of {cage_name}')
-    print(f'Conjugate Gradient: {CG}')
+    print(f'Conjugate Gradient: {CG}, Max steps: {maxcyc}')
     gulp_opt = stko.GulpUFFOptimizer(
-        gulp_path='/home/atarzia/software/gulp-5.1/Src/gulp/gulp',
+        gulp_path=gulp_exec,
+        maxcyc=maxcyc,
         metal_FF=metal_FFs,
         output_dir=f'cage_opt_{cage_name}_uff',
         conjugate_gradient=CG
@@ -390,7 +400,8 @@ def MOC_MD_opt(
     production,
     opt_conf,
     metal_FFs,
-    save_conf=False
+    save_conf=False,
+    gulp_exec=None,
 ):
     """
     Perform UFF4MOF molecular dynamics of MOC.
@@ -410,10 +421,12 @@ def MOC_MD_opt(
 
     """
 
-    # TODO: Require Exec
+    if gulp_exec is None:
+        gulp_exec = '/home/atarzia/software/gulp-5.1/Src/gulp/gulp'
+
     print(f'..........doing UFF4MOF MD of {cage_name}')
     gulp_MD = stko.GulpUFFMDOptimizer(
-        gulp_path='/home/atarzia/software/gulp-5.1/Src/gulp/gulp',
+        gulp_path=gulp_exec,
         metal_FF=metal_FFs,
         output_dir=f'cage_opt_{cage_name}_MD',
         integrator=integrator,
