@@ -16,6 +16,7 @@ import stk
 from os.path import exists
 
 from .IO_tools import read_gfnx2xtb_eyfile
+from .stk_f import calculate_molecule_planarity
 from .stko_f import calculate_energy
 from .ligand_calculations import (
     calculate_bite_angle,
@@ -133,7 +134,6 @@ def calculate_abs_imine_torsions(org_ligs):
     # Iterate over ligands.
     for lig in org_ligs:
         stk_lig = org_ligs[lig]
-        print(lig)
         # Find torsions.
         smarts = '[#6]-[#7X2]=[#6X3H1]-[#6X3]'
         rdkit_mol = stk_lig.to_rdkit_mol()
@@ -163,21 +163,28 @@ def calculate_abs_imine_torsions(org_ligs):
     return torsions
 
 
-def calculate_ligand_planarities(org_ligs):
+def calculate_ligand_planarities(
+    org_ligs,
+    smiles_keys,
+    file_prefix=None
+):
     """
-    Calculate the change in planarity of the core of all ligands.
+    Calculate the planarity of all ligands.
 
     """
 
-    # Iterate over each ligand and find core based on the input
-    # molecule and its FGs (i.e. the core is the parts of the
-    # input molecule that is not part of the FGs).
+    planarities = {}
+    # Iterate over ligands.
+    for lig in org_ligs:
+        stk_lig = org_ligs[lig]
 
-    # Calculate planarity of the cores compared to input molecule.
+        # Calculate planarity.
+        planarity = calculate_molecule_planarity(stk_lig)
 
-    # Save to list.
+        # Angstroms.
+        planarities[lig] = planarity
 
-    return []
+    return planarities
 
 
 def calculate_deltaangle_distance(
