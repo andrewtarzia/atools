@@ -163,11 +163,7 @@ def calculate_abs_imine_torsions(org_ligs):
     return torsions
 
 
-def calculate_ligand_planarities(
-    org_ligs,
-    smiles_keys,
-    file_prefix=None
-):
+def calculate_ligand_planarities(org_ligs):
     """
     Calculate the planarity of all ligands.
 
