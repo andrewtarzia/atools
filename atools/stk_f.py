@@ -21,6 +21,7 @@ from scipy.spatial.distance import euclidean
 from .IO_tools import read_gfnx2xtb_eyfile
 from .stko_f import optimize_conformer, calculate_energy
 from .utilities import build_conformers, update_from_rdkit_conf
+from .calculations import shortest_distance_to_plane
 
 
 class AromaticCNCFactory(stk.FunctionalGroupFactory):
@@ -751,6 +752,7 @@ def get_lowest_energy_conformer(
             calc_hessian=calc_hessian,
             solvent=solvent
         )
+        opt_mol.write(f'temp_co_{cid}.mol')
 
         # Get energy.
         calculate_energy(
@@ -763,6 +765,10 @@ def get_lowest_energy_conformer(
         )
         ey = read_gfnx2xtb_eyfile(ey_file)
         if ey < low_e:
+            print(
+                'lowest energy conformer updated with energy: '
+                f'{ey}, id: {cid}'
+            )
             low_e_conf_id = cid
             low_e = ey
 
@@ -789,3 +795,28 @@ def get_lowest_energy_conformer(
 
     # Return molecule.
     return low_e_conf
+
+
+def calculate_molecule_planarity(mol):
+    """
+    Calculate planrity of molecule as sum of deviation from plane.
+
+    Returns sum in Angstrom.
+
+    """
+
+    centroid = mol.get_centroid()
+    normal = mol.get_plane_normal()
+    # Plane of equation ax + by + cz = d.
+    atom_plane = np.append(normal, np.sum(normal*centroid))
+    # Define the plane deviation as the sum of the distance of all
+    # atoms from the plane defined by all atoms.
+    plane_dev = sum([
+        shortest_distance_to_plane(
+            atom_plane,
+            tuple(mol.get_atomic_positions(atom_ids=i.get_id()), )[0]
+        )
+        for i in mol.get_atoms()
+    ])
+
+    return plane_dev
