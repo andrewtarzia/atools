@@ -374,13 +374,18 @@ def MOC_uff_opt(
     if gulp_exec is None:
         gulp_exec = '/home/atarzia/software/gulp-5.1/Src/gulp/gulp'
 
+    output_dir = (
+        f'cage_opt_{cage_name}_uff' if CG is False
+        else f'cage_opt_{cage_name}_uffCG'
+    )
+
     print(f'..........doing UFF4MOF optimisation of {cage_name}')
     print(f'Conjugate Gradient: {CG}, Max steps: {maxcyc}')
     gulp_opt = stko.GulpUFFOptimizer(
         gulp_path=gulp_exec,
         maxcyc=maxcyc,
         metal_FF=metal_FFs,
-        output_dir=f'cage_opt_{cage_name}_uff',
+        output_dir=output_dir,
         conjugate_gradient=CG
     )
     gulp_opt.assign_FF(cage)
