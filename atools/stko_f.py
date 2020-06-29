@@ -349,6 +349,7 @@ def MOC_uff_opt(
     cage,
     cage_name,
     metal_FFs,
+    metal_ligand_bond_order='half',
     CG=False,
     maxcyc=1000,
     gulp_exec=None,
@@ -385,6 +386,7 @@ def MOC_uff_opt(
         gulp_path=gulp_exec,
         maxcyc=maxcyc,
         metal_FF=metal_FFs,
+        metal_ligand_bond_order=metal_ligand_bond_order,
         output_dir=output_dir,
         conjugate_gradient=CG
     )
@@ -405,6 +407,7 @@ def MOC_MD_opt(
     production,
     opt_conf,
     metal_FFs,
+    metal_ligand_bond_order='half',
     save_conf=False,
     gulp_exec=None,
 ):
@@ -433,6 +436,7 @@ def MOC_MD_opt(
     gulp_MD = stko.GulpUFFMDOptimizer(
         gulp_path=gulp_exec,
         metal_FF=metal_FFs,
+        metal_ligand_bond_order=metal_ligand_bond_order,
         output_dir=f'cage_opt_{cage_name}_MD',
         integrator=integrator,
         ensemble='nvt',
