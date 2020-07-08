@@ -655,7 +655,8 @@ def get_organic_linkers(cage, metal_atom_nos, file_prefix=None):
 def get_lowest_energy_conformers(
     org_ligs,
     smiles_keys,
-    file_prefix=None
+    file_prefix=None,
+    gfn_exec=None,
 ):
     """
     Determine the lowest energy conformer of cage organic linkers.
@@ -677,6 +678,9 @@ def get_lowest_energy_conformers(
         "file_prefix"{number of atoms}_{idx}_{i}.mol
         Where `idx` determines if a molecule is unique by smiles.
 
+    gfn_exec : :class:`str`, optional
+        Location of GFN-xTB executable to use.
+
     """
 
     for lig in org_ligs:
@@ -697,7 +701,8 @@ def get_lowest_energy_conformers(
                 mkdir(f'{ligand_name_}_confs/')
             low_e_conf = get_lowest_energy_conformer(
                 name=ligand_name_,
-                mol=stk_lig
+                mol=stk_lig,
+                gfn_exec=gfn_exec,
             )
             low_e_conf.write(filename_)
 
@@ -705,6 +710,7 @@ def get_lowest_energy_conformers(
 def get_lowest_energy_conformer(
     name,
     mol,
+    gfn_exec=None,
     opt_level='extreme',
     charge=0,
     no_unpaired_e=0,
@@ -739,12 +745,13 @@ def get_lowest_energy_conformer(
             confs,
             conf_id=cid
         )
-        mol.write(f'temp_c_{cid}.mol')
+        mol.write(f'{name}_confs/c_{cid}.mol')
 
         # Optimize.
         opt_mol = optimize_conformer(
             name=name_+'_opt',
             mol=mol,
+            gfn_exec=gfn_exec,
             opt_level='normal',
             charge=charge,
             no_unpaired_e=no_unpaired_e,
@@ -752,12 +759,13 @@ def get_lowest_energy_conformer(
             calc_hessian=calc_hessian,
             solvent=solvent
         )
-        opt_mol.write(f'temp_co_{cid}.mol')
+        opt_mol.write(f'{name}_confs/c_{cid}_opt.mol')
 
         # Get energy.
         calculate_energy(
             name=name_+'_ey',
             mol=opt_mol,
+            gfn_exec=gfn_exec,
             ey_file=ey_file,
             charge=charge,
             no_unpaired_e=no_unpaired_e,
@@ -778,12 +786,13 @@ def get_lowest_energy_conformer(
         confs,
         conf_id=low_e_conf_id
     )
-    low_e_conf.write('temp_pre_opt.mol')
+    low_e_conf.write(f'{name}_confs/low_e_unopt.mol')
 
     # Optimize lowest energy conformer at opt_level.
     low_e_conf = optimize_conformer(
         name=name_+'low_e_opt',
         mol=low_e_conf,
+        gfn_exec=gfn_exec,
         opt_level=opt_level,
         charge=charge,
         no_unpaired_e=no_unpaired_e,
@@ -791,7 +800,7 @@ def get_lowest_energy_conformer(
         calc_hessian=calc_hessian,
         solvent=solvent
     )
-    low_e_conf.write('temp_post_opt.mol')
+    low_e_conf.write(f'{name}_confs/low_e_opt.mol')
 
     # Return molecule.
     return low_e_conf

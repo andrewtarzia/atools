@@ -738,6 +738,7 @@ def MOC_xtb_FFCREST_opt(
 def optimize_conformer(
     name,
     mol,
+    gfn_exec=None,
     opt_level='extreme',
     charge=0,
     no_unpaired_e=0,
@@ -750,6 +751,9 @@ def optimize_conformer(
 
     """
 
+    if gfn_exec is None:
+        gfn_exec = '/home/atarzia/software/xtb-190806/bin/xtb'
+
     print(f'....optimizing {name}')
     if solvent is None:
         solvent_str = None
@@ -757,7 +761,7 @@ def optimize_conformer(
     else:
         solvent_str, solvent_grid = solvent
     xtb_opt = stko.XTB(
-        xtb_path='/home/atarzia/software/xtb-190806/bin/xtb',
+        xtb_path=gfn_exec,
         output_dir=f'{name}_opt',
         gfn_version=2,
         num_cores=6,
@@ -778,6 +782,7 @@ def calculate_energy(
     name,
     mol,
     ey_file,
+    gfn_exec=None,
     charge=0,
     no_unpaired_e=0,
     solvent=None
@@ -787,6 +792,9 @@ def calculate_energy(
 
     """
 
+    if gfn_exec is None:
+        gfn_exec = '/home/atarzia/software/xtb-190806/bin/xtb'
+
     print(f'....getting energy of {name}')
     if solvent is None:
         solvent_str = None
@@ -794,7 +802,7 @@ def calculate_energy(
     else:
         solvent_str, solvent_grid = solvent
     xtb_energy = stko.XTBEnergy(
-        xtb_path='/home/atarzia/software/xtb-190806/bin/xtb',
+        xtb_path=gfn_exec,
         output_dir=f'{name}_ey',
         num_cores=6,
         charge=charge,
