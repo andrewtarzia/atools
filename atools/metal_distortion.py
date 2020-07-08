@@ -268,3 +268,55 @@ def get_order_values(mol, metal, per_site=False):
         }
 
         return results
+
+
+def calculate_metal_ligand_distance(
+    mol,
+    metal_atomic_number,
+    ligand_atomic_number
+):
+    """
+    Calculate all bond lengths in mol between metal and ligand atoms.
+
+    Parameters
+    ----------
+    mol : :class:`stk.ConstructedMolecule`
+        stk molecule to analyse.
+
+    metal_atomic_number : :class:`int`
+        Element number of metal atom.
+
+    ligand_atomic_number : :class:`int`
+        Element number of atoms bonded to metal.
+
+    Returns
+    -------
+    bond_lengths : :class:`list`
+        Bond lengths (in Angstrom).
+
+    """
+
+    bond_lengths = []
+    # Calculate bond lengths.
+    for bond in mol.get_bonds():
+        atom1_id = bond.get_atom1().get_id()
+        atom2_id = bond.get_atom2().get_id()
+        atom1_an = bond.get_atom1().get_atomic_number()
+        atom2_an = bond.get_atom2().get_atomic_number()
+        chk1 = (
+            atom1_an == metal_atomic_number
+            and atom2_an == ligand_atomic_number
+        )
+        chk2 = (
+            atom1_an == ligand_atomic_number
+            and atom2_an == metal_atomic_number
+        )
+        if chk1 or chk2:
+            bond_lengths.append(
+                get_atom_distance(
+                    molecule=mol,
+                    atom1_id=atom1_id,
+                    atom2_id=atom2_id,
+                )
+            )
+    return bond_lengths
