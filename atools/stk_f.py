@@ -657,6 +657,7 @@ def get_lowest_energy_conformers(
     smiles_keys,
     file_prefix=None,
     gfn_exec=None,
+    conformer_function=None
 ):
     """
     Determine the lowest energy conformer of cage organic linkers.
@@ -681,7 +682,14 @@ def get_lowest_energy_conformers(
     gfn_exec : :class:`str`, optional
         Location of GFN-xTB executable to use.
 
+    conformer_function : :class:`function`, optional
+        Define the function used to rank and find the lowest energy
+        conformer.
+
     """
+
+    if conformer_function is None:
+        conformer_function = get_lowest_energy_conformer
 
     for lig in org_ligs:
         stk_lig = org_ligs[lig]
@@ -699,7 +707,7 @@ def get_lowest_energy_conformers(
         if not exists(filename_):
             if not exists(f'{ligand_name_}_confs/'):
                 mkdir(f'{ligand_name_}_confs/')
-            low_e_conf = get_lowest_energy_conformer(
+            low_e_conf = conformer_function(
                 name=ligand_name_,
                 mol=stk_lig,
                 gfn_exec=gfn_exec,
@@ -749,7 +757,7 @@ def get_lowest_energy_conformer(
 
         # Optimize.
         opt_mol = optimize_conformer(
-            name=name_+'_opt',
+            name=name_,
             mol=mol,
             gfn_exec=gfn_exec,
             opt_level='normal',
@@ -763,7 +771,7 @@ def get_lowest_energy_conformer(
 
         # Get energy.
         calculate_energy(
-            name=name_+'_ey',
+            name=name_,
             mol=opt_mol,
             gfn_exec=gfn_exec,
             ey_file=ey_file,
@@ -781,16 +789,14 @@ def get_lowest_energy_conformer(
             low_e = ey
 
     # Get lowest energy conformer.
-    low_e_conf = update_from_rdkit_conf(
-        mol,
-        confs,
-        conf_id=low_e_conf_id
+    low_e_conf = stk.BuildingBlock.init_from_file(
+        f'{name}_confs/c_{low_e_conf_id}_opt.mol'
     )
     low_e_conf.write(f'{name}_confs/low_e_unopt.mol')
 
     # Optimize lowest energy conformer at opt_level.
     low_e_conf = optimize_conformer(
-        name=name_+'low_e_opt',
+        name=name+'low_e_opt',
         mol=low_e_conf,
         gfn_exec=gfn_exec,
         opt_level=opt_level,
