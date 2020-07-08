@@ -52,7 +52,8 @@ def build_conformers(mol, N):
         numConfs=N,
         randomSeed=1000,
         useExpTorsionAnglePrefs=True,
-        useBasicKnowledge=True
+        useBasicKnowledge=True,
+        numThreads=4,
     )
     print(f'there are {molecule.GetNumConformers()} conformers')
     return cids, molecule
