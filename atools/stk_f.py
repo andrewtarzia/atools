@@ -718,7 +718,7 @@ def get_lowest_energy_conformers(
                 name=ligand_name_,
                 mol=stk_lig,
                 gfn_exec=gfn_exec,
-                conformer_settings=conformer_settings
+                settings=conformer_settings
             )
             low_e_conf.write(filename_)
 
