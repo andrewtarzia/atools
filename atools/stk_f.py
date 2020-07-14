@@ -24,6 +24,10 @@ from .utilities import build_conformers, update_from_rdkit_conf
 from .calculations import shortest_distance_to_plane
 
 
+class MissingSettingError(Exception):
+    ...
+
+
 class AromaticCNCFactory(stk.FunctionalGroupFactory):
     """
     A subclass of stk.SmartsFunctionalGroupFactory.
@@ -657,7 +661,8 @@ def get_lowest_energy_conformers(
     smiles_keys,
     file_prefix=None,
     gfn_exec=None,
-    conformer_function=None
+    conformer_function=None,
+    conformer_settings=None,
 ):
     """
     Determine the lowest energy conformer of cage organic linkers.
@@ -690,6 +695,8 @@ def get_lowest_energy_conformers(
 
     if conformer_function is None:
         conformer_function = get_lowest_energy_conformer
+    if conformer_settings is None:
+        conformer_settings = None
 
     for lig in org_ligs:
         stk_lig = org_ligs[lig]
@@ -711,6 +718,7 @@ def get_lowest_energy_conformers(
                 name=ligand_name_,
                 mol=stk_lig,
                 gfn_exec=gfn_exec,
+                conformer_settings=conformer_settings
             )
             low_e_conf.write(filename_)
 
@@ -719,12 +727,7 @@ def get_lowest_energy_conformer(
     name,
     mol,
     gfn_exec=None,
-    opt_level='extreme',
-    charge=0,
-    no_unpaired_e=0,
-    max_runs=1,
-    calc_hessian=False,
-    solvent=None
+    settings=None,
 ):
     """
     Get lowest energy conformer of molecule.
@@ -736,6 +739,28 @@ def get_lowest_energy_conformer(
         4) save file
 
     """
+
+    if settings is None:
+        settings = {
+            'conf_opt_level': 'normal',
+            'final_opt_level': 'extreme',
+            'charge': 0,
+            'no_unpaired_e': 0,
+            'max_runs': 1,
+            'calc_hessian': False,
+            'solvent': None
+        }
+
+    # Check for missing settings.
+    req_settings = [
+        'N', 'final_opt_level', 'charge', 'no_unpaired_e', 'max_runs',
+        'calc_hessian', 'solvent', 'conf_opt_level'
+    ]
+    for i in req_settings:
+        if i not in settings:
+            raise MissingSettingError(
+                f'Settings missing {i}. Has {settings.keys()}.'
+            )
 
     # Run ETKDG on molecule.
     print(f'....running ETKDG on {name}')
@@ -760,12 +785,12 @@ def get_lowest_energy_conformer(
             name=name_,
             mol=mol,
             gfn_exec=gfn_exec,
-            opt_level='normal',
-            charge=charge,
-            no_unpaired_e=no_unpaired_e,
-            max_runs=max_runs,
-            calc_hessian=calc_hessian,
-            solvent=solvent
+            opt_level=settings['conf_opt_level'],
+            charge=settings['charge'],
+            no_unpaired_e=settings['no_unpaired_e'],
+            max_runs=settings['max_runs'],
+            calc_hessian=settings['calc_hessian'],
+            solvent=settings['solvent']
         )
         opt_mol.write(f'{name}_confs/c_{cid}_opt.mol')
 
@@ -775,9 +800,9 @@ def get_lowest_energy_conformer(
             mol=opt_mol,
             gfn_exec=gfn_exec,
             ey_file=ey_file,
-            charge=charge,
-            no_unpaired_e=no_unpaired_e,
-            solvent=solvent
+            charge=settings['charge'],
+            no_unpaired_e=settings['no_unpaired_e'],
+            solvent=settings['solvent']
         )
         ey = read_gfnx2xtb_eyfile(ey_file)
         if ey < low_e:
@@ -799,12 +824,12 @@ def get_lowest_energy_conformer(
         name=name+'low_e_opt',
         mol=low_e_conf,
         gfn_exec=gfn_exec,
-        opt_level=opt_level,
-        charge=charge,
-        no_unpaired_e=no_unpaired_e,
-        max_runs=max_runs,
-        calc_hessian=calc_hessian,
-        solvent=solvent
+        opt_level=settings['final_opt_level'],
+        charge=settings['charge'],
+        no_unpaired_e=settings['no_unpaired_e'],
+        max_runs=settings['max_runs'],
+        calc_hessian=settings['calc_hessian'],
+        solvent=settings['solvent']
     )
     low_e_conf.write(f'{name}_confs/low_e_opt.mol')
 
