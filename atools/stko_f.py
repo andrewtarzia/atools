@@ -683,6 +683,67 @@ def MOC_xtb_FF_opt(
     return cage
 
 
+def MOC_xtb_CREST_opt(
+    cage,
+    cage_name,
+    gfn_exec,
+    crest_exec,
+    nc,
+    opt_level,
+    charge,
+    keepdir,
+    cross,
+    etemp,
+    free_e,
+    md_len=None,
+    ewin=5,
+    speed_setting=None,
+    solvent=None,
+):
+    """
+    Perform GFN2-xTB optimisation of MOC.
+
+    Parameters
+    ----------
+    cage : :class:`stk.ConstructedMolecule`
+        Cage to be optimised.
+
+    cage_name : :class:`str`
+        Name of cage.
+
+    Returns
+    -------
+    cage : :class:`stk.ConstructedMolecule`
+        Optimised cage.
+
+    """
+
+    if solvent is None:
+        solvent_str = None
+        solvent_grid = 'normal'
+    else:
+        solvent_str, solvent_grid = solvent
+
+    print(f'..........doing GFN-n CREST optimisation of {cage_name}')
+    xtb_ff_crest = stko.XTBCREST(
+        crest_path=crest_exec,
+        xtb_path=gfn_exec,
+        output_dir=f'cage_opt_{cage_name}_xtbcrest',
+        num_cores=nc,
+        ewin=ewin,
+        opt_level=opt_level,
+        charge=charge,
+        keepdir=keepdir,
+        cross=cross,
+        speed_setting=speed_setting,
+        md_len=md_len,
+        unlimited_memory=True,
+    )
+    cage = xtb_ff_crest.optimize(mol=cage)
+
+    return cage
+
+
 def MOC_xtb_FFCREST_opt(
     cage,
     cage_name,
@@ -817,3 +878,64 @@ def calculate_energy(
 
     with open(ey_file, 'w') as f:
         f.write(str(energy))
+
+
+def crest_conformer_search(
+    molecule,
+    output_dir,
+    gfn_exec,
+    crest_exec,
+    gfn_version,
+    nc,
+    opt_level,
+    charge,
+    keepdir,
+    cross,
+    etemp,
+    no_unpaired_e,
+    md_len=None,
+    ewin=5,
+    speed_setting=None,
+    solvent=None,
+):
+    """
+    Perform conformer search with GFN-2 and CREST.
+
+    Parameters
+    ----------
+
+    solvent grid is not considered in CREST.
+
+    Returns
+    -------
+
+    """
+
+    if solvent is None:
+        solvent_str = None
+        solvent_grid = 'normal'
+    else:
+        solvent_str, solvent_grid = solvent
+
+    print(f'..........doing GFN-2 CREST optimisation')
+    xtb_ff_crest = stko.XTBCREST(
+        crest_path=crest_exec,
+        xtb_path=gfn_exec,
+        gfn_version=2,
+        output_dir=output_dir,
+        num_cores=nc,
+        ewin=ewin,
+        opt_level=opt_level,
+        charge=charge,
+        electronic_temperature=etemp,
+        num_unpaired_electrons=no_unpaired_e,
+        solvent=solvent_str,
+        keepdir=keepdir,
+        cross=cross,
+        speed_setting=speed_setting,
+        md_len=md_len,
+        unlimited_memory=True,
+    )
+    molecule = xtb_ff_crest.optimize(mol=molecule)
+
+    return molecule

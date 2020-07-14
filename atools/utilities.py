@@ -68,7 +68,6 @@ def build_conformers(mol, N, ETKDG_version=None):
 
     elif ETKDG_version == 'v3':
         params = rdkit.ETKDGv3()
-        params.numThreads = 4
         params.randomSeed = 1000
         cids = rdkit.EmbedMultipleConfs(
             mol=molecule,
