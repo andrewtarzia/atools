@@ -265,6 +265,96 @@ def histogram_plot_N(
     return fig, ax
 
 
+def histogram_w_scatters_plot(
+    X,
+    X_range,
+    X_width,
+    X_title,
+    Y,
+    Y_range,
+    Y_width,
+    Y_title,
+    scat_alpha=1.0,
+    s=80,
+    hist_alpha=1.0,
+    color='k',
+    edgecolor='k',
+    marker='o',
+    density=False,
+):
+    """
+    Make scatter plot histogram plot distribution on both axes.
+
+    """
+
+    # definitions for the axes
+    left, width = 0.1, 0.65
+    bottom, height = 0.1, 0.65
+    spacing = 0.005
+    rect_scatter = [left, bottom, width, height]
+    rect_histx = [left, bottom + height + spacing, width, 0.2]
+    rect_histy = [left + width + spacing, bottom, 0.2, height]
+
+    X_bins = np.arange(X_range[0], X_range[1], X_width)
+    Y_bins = np.arange(Y_range[0], Y_range[1], Y_width)
+
+    fig = plt.figure(figsize=(8, 8))
+    ax_scatter = plt.axes(rect_scatter)
+    ax_scatter.tick_params(
+        direction='in',
+        top=True,
+        right=True,
+        labelsize=16,
+    )
+    ax_histx = plt.axes(rect_histx)
+    ax_histx.tick_params(
+        direction='in',
+        labelbottom=False,
+        labelsize=16,
+    )
+    ax_histy = plt.axes(rect_histy)
+    ax_histy.tick_params(
+        direction='in',
+        labelleft=False,
+        labelsize=16,
+    )
+
+    ax_scatter.scatter(
+        X, Y,
+        c=color,
+        edgecolors=edgecolor,
+        marker=marker,
+        alpha=scat_alpha,
+        s=s
+    )
+    ax_scatter.set_xlabel(X_title, fontsize=16)
+    ax_scatter.set_ylabel(Y_title, fontsize=16)
+    ax_scatter.set_xlim(X_range)
+    ax_scatter.set_ylim(Y_range)
+
+    ax_histx.hist(
+        X,
+        bins=X_bins,
+        density=density,
+        alpha=hist_alpha,
+        color=color,
+        edgecolor=edgecolor,
+    )
+    ax_histy.hist(
+        Y,
+        bins=Y_bins,
+        orientation='horizontal',
+        density=density,
+        alpha=hist_alpha,
+        color=color,
+        edgecolor=edgecolor,
+    )
+    ax_histx.set_xlim(ax_scatter.get_xlim())
+    ax_histy.set_ylim(ax_scatter.get_ylim())
+
+    return fig
+
+
 def flat_line(ax, x, y, w=0, C='k', m='x'):
     ax.plot([x - w, x, x + w], [y, y, y], c=C)
     ax.scatter(x, y, marker=m, c=C)
