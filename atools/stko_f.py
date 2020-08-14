@@ -232,7 +232,7 @@ def MOC_collapse(
     scale_steps
 ):
     """
-    Perform RDKit optimisation of MOC.
+    Perform Collapser optimisation of MOC.
 
     Parameters
     ----------
@@ -252,10 +252,48 @@ def MOC_collapse(
     print(f'..........doing collapser optimisation of {cage_name}')
     output_dir = f'cage_opt_{cage_name}_coll'
     optimizer = stko.Collapser(
-        output_dir,
-        step_size,
-        distance_cut,
-        scale_steps
+        output_dir=output_dir,
+        step_size=step_size,
+        distance_cut=distance_cut,
+        scale_steps=scale_steps,
+    )
+    cage = optimizer.optimize(mol=cage)
+
+    return cage
+
+
+def MOC_collapse_v2(
+    cage,
+    cage_name,
+    step_size,
+    target_bond_length,
+    num_steps
+):
+    """
+    Perform CollapserV2 optimisation of MOC.
+
+    Parameters
+    ----------
+    cage : :class:`stk.ConstructedMolecule`
+        Cage to be optimised.
+
+    cage_name : :class:`str`
+        Name of cage.
+
+    Returns
+    -------
+    cage : :class:`stk.ConstructedMolecule`
+        Optimised cage.
+
+    """
+
+    print(f'..........doing collapser optimisation of {cage_name}')
+    output_dir = f'cage_opt_{cage_name}_coll'
+    optimizer = stko.Collapserv2(
+        output_dir=output_dir,
+        step_size=step_size,
+        target_bond_length=target_bond_length,
+        num_steps=num_steps,
     )
     cage = optimizer.optimize(mol=cage)
 
