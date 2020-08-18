@@ -262,7 +262,7 @@ def MOC_collapse(
     return cage
 
 
-def MOC_collapse_v2(
+def MOC_collapse_mc(
     cage,
     cage_name,
     step_size,
@@ -289,7 +289,7 @@ def MOC_collapse_v2(
 
     print(f'..........doing collapser optimisation of {cage_name}')
     output_dir = f'cage_opt_{cage_name}_coll'
-    optimizer = stko.Collapserv2(
+    optimizer = stko.CollapserMC(
         output_dir=output_dir,
         step_size=step_size,
         target_bond_length=target_bond_length,
