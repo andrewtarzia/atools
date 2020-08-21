@@ -748,7 +748,8 @@ def get_lowest_energy_conformer(
             'no_unpaired_e': 0,
             'max_runs': 1,
             'calc_hessian': False,
-            'solvent': None
+            'solvent': None,
+            'N': 100
         }
 
     # Check for missing settings.
@@ -764,7 +765,7 @@ def get_lowest_energy_conformer(
 
     # Run ETKDG on molecule.
     print(f'....running ETKDG on {name}')
-    cids, confs = build_conformers(mol, N=100)
+    cids, confs = build_conformers(mol, N=settings['N'])
 
     # Optimize all conformers at normal level with xTB.
     low_e_conf_id = -100
