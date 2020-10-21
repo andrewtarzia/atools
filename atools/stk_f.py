@@ -838,13 +838,26 @@ def get_lowest_energy_conformer(
     return low_e_conf
 
 
-def calculate_molecule_planarity(mol):
+def calculate_molecule_planarity(mol, atom_ids=None):
     """
     Calculate planrity of molecule as sum of deviation from plane.
 
     Returns sum in Angstrom.
 
+    Arguments
+    ---------
+    mol : :class:`stk.Molecule`
+        Molecule.
+
+    atom_ids : iterable of :class:`int`, optional
+        Atom ids to calculate deviation for. Defaults to all atom ids.
+
     """
+
+    if atom_ids is None:
+        atom_ids = list(range(len(list(mol.get_atoms()))))
+    else:
+        atom_ids = list(atom_ids)
 
     centroid = mol.get_centroid()
     normal = mol.get_plane_normal()
@@ -857,7 +870,7 @@ def calculate_molecule_planarity(mol):
             atom_plane,
             tuple(mol.get_atomic_positions(atom_ids=i.get_id()), )[0]
         )
-        for i in mol.get_atoms()
+        for i in mol.get_atoms() if i.get_id() in atom_ids
     ])
 
     return plane_dev
