@@ -36,7 +36,7 @@ class AromaticCNCFactory(stk.FunctionalGroupFactory):
 
     def __init__(self, bonders=(1, ), deleters=()):
         """
-        Initialise :class:`.AromaticCNCFactory`
+        Initialise :class:`.AromaticCNCFactory`.
 
         """
 
@@ -177,7 +177,7 @@ class AromaticCNNFactory(stk.FunctionalGroupFactory):
 
     def __init__(self, bonders=(1, ), deleters=()):
         """
-        Initialise :class:`.AromaticCNNFactory`
+        Initialise :class:`.AromaticCNNFactory`.
 
         """
 
