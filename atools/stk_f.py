@@ -838,7 +838,7 @@ def get_lowest_energy_conformer(
     return low_e_conf
 
 
-def calculate_molecule_planarity(mol, atom_ids=None):
+def calculate_molecule_planarity(mol, plane_ids=None, atom_ids=None):
     """
     Calculate planrity of molecule as sum of deviation from plane.
 
@@ -849,18 +849,26 @@ def calculate_molecule_planarity(mol, atom_ids=None):
     mol : :class:`stk.Molecule`
         Molecule.
 
+    plane_ids : iterable of :class:`int`, optional
+        Atom ids to use to define plane. Defaults to all atom ids.
+
     atom_ids : iterable of :class:`int`, optional
         Atom ids to calculate deviation for. Defaults to all atom ids.
 
     """
+
+    if plane_ids is None:
+        plane_ids = list(range(len(list(mol.get_atoms()))))
+    else:
+        plane_ids = list(plane_ids)
 
     if atom_ids is None:
         atom_ids = list(range(len(list(mol.get_atoms()))))
     else:
         atom_ids = list(atom_ids)
 
-    centroid = mol.get_centroid()
-    normal = mol.get_plane_normal()
+    centroid = mol.get_centroid(atom_ids=plane_ids)
+    normal = mol.get_plane_normal(atom_ids=plane_ids)
     # Plane of equation ax + by + cz = d.
     atom_plane = np.append(normal, np.sum(normal*centroid))
     # Define the plane deviation as the sum of the distance of all
