@@ -11,7 +11,7 @@ Date Created: 18 Mar 2019
 """
 
 from os.path import exists
-from os import mkdir
+from os import mkdir, system
 import stk
 import numpy as np
 from mendeleev import element
@@ -647,6 +647,7 @@ def get_organic_linkers(cage, metal_atom_nos, file_prefix=None):
             filename_ = f'{file_prefix}{sgt}_{idx}_{i}.mol'
 
         org_lig[filename_] = temporary_linker
+        system('rm temporary_linker.mol')
         # Rewrite to fix atom ids.
         org_lig[filename_].write(filename_)
         org_lig[filename_] = stk.BuildingBlock.init_from_file(
