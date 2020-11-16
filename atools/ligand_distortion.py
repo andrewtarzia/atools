@@ -124,18 +124,21 @@ def calculate_ligand_SE(
     return strain_energies
 
 
-def calculate_abs_imine_torsions(org_ligs):
+def calculate_abs_imine_torsions(org_ligs, smarts=None):
     """
     Calculate the imine torsion of all ligands in the cage.
 
     """
+
+    if smarts is None:
+        # C-N=C(H)-C(X)-X, where X != H.
+        smarts = '[#6]-[#7X2]=[#6X3H1]-[#6X3!H1]'
 
     torsions = {}
     # Iterate over ligands.
     for lig in org_ligs:
         stk_lig = org_ligs[lig]
         # Find torsions.
-        smarts = '[#6]-[#7X2]=[#6X3H1]-[#6X3]'
         rdkit_mol = stk_lig.to_rdkit_mol()
         query_ids = get_query_atom_ids(smarts, rdkit_mol)
         # Calculate torsional angle for all imines.
@@ -189,6 +192,7 @@ def calculate_deltaangle_distance(
     fg_factory,
     file_prefix=None
 ):
+
     """
     Calculate the change of bite angle of each ligand in the cage.
 
