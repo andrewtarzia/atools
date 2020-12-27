@@ -199,8 +199,8 @@ def calculate_N_COM_N_angle(bb):
 
     if fg_counts != 2:
         raise ValueError(
-            f'{bb} does not have 2 AromaticCNC or AromaticCNN functional '
-            'groups.'
+            f'{bb} does not have 2 AromaticCNC or AromaticCNN '
+            'functional groups.'
         )
 
     # Get building block COM.
