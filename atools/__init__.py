@@ -13,5 +13,6 @@ from .ligand_distortion import *
 from .ligand_calculations import *
 from .metal_distortion import *
 from .utilities import *
+from .shape_f import *
 
 __version__ = '0.0.1'
