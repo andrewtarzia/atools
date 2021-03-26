@@ -15,16 +15,51 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 
 
-def colors_i_like():
+def colors_i_like(palette=None):
     """
     A list of colours I like to choose from.
+    
+    palette options:
+        None
+        Base
+        IBM
+        Wong
+        Tol
+        CB_pairs
 
     """
-    return [
-        '#FA7268', '#F8A72A', '#DAF7A6', '#900C3F', '#6BADB0',
-        '#DB869D', '#F6D973', 'mediumvioletred',
-        'skyblue', 'gold', 'palegreen', 'coral',
-    ]
+    
+    if palette is None:
+         return [
+            '#FA7268', '#F8A72A', '#DAF7A6', '#900C3F', '#6BADB0',
+            '#DB869D', '#F6D973', 'mediumvioletred',
+            'skyblue', 'gold', 'palegreen', 'coral',
+        ]
+    elif palette == 'Base':
+        return [
+            '#D81B60', '#1E88E5', '#FFC107', '#FE6100', '#004D40'
+        ]
+    elif palette == 'IBM':
+        return [
+            '#648FFF', '#785EF0', '#DC267F', '#FE6100', '#FFB000'
+        ]
+    elif palette == 'Wong':
+        return [
+            '#000000', '#E69F00', '#56B4E9', '#009E73', '#F0E442', 
+            '#0072B2', '#D55E00', '#CC79A7'
+        ]
+    elif palette == 'Tol':
+        return [
+            '#332288', '#117733', '#44AA99', '#88CCEE', '#DDCC77', 
+            '#CC6677', '#AA4499', '#882255',
+        ]
+    elif palette == 'CB_pairs':
+        return [
+            '#FFC20A', '#0C7BDC', '#994F00', '#006CD1', '#E1BE6A', 
+            '#40B0A6', '#E66100', '#5D3A9B', '#1AFF1A', '#4B0092', 
+            '#FEFE62', '#D35FB7', '#005AB5', '#DC3220', '#1A85FF', 
+            '#D41159',
+        ]
 
 
 def markers_i_like():
