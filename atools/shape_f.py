@@ -5,7 +5,8 @@
 """
 Functions for SHAPE usage.
 
-Shape: http://www.ee.ub.edu/index.php?option=com_content&view=article&id=575:shape-available&catid=80:news&Itemid=466
+Shape: http://www.ee.ub.edu/index.php?option=com_content&view=article&
+id=575:shape-available&catid=80:news&Itemid=466
 
 Author: Andrew Tarzia
 
@@ -29,6 +30,7 @@ def ref_shape_dict():
             'code': '1',
         },
     }
+
 
 def write_shape_input_file(
     input_file,
@@ -58,7 +60,6 @@ def write_shape_input_file(
 
     with open(input_file, 'w') as f:
         f.write(string)
-
 
 
 def run_shape(input_file, shape_path, std_out):

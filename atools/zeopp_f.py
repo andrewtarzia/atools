@@ -20,8 +20,6 @@ def convert_zsa_to_xyz(file):
         data = f.readlines()
 
     for i, j in enumerate(data):
-        if 'color green' in j:
-            green_mention = i
         if 'color red' in j:
             red_mention = i
 

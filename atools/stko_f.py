@@ -955,7 +955,7 @@ def crest_conformer_search(
     else:
         solvent_str, solvent_grid = solvent
 
-    print(f'..........doing GFN-2 CREST optimisation')
+    print('..........doing GFN-2 CREST optimisation')
     xtb_ff_crest = stko.XTBCREST(
         crest_path=crest_exec,
         xtb_path=gfn_exec,

@@ -261,9 +261,12 @@ def smiles2conformers(smiles, N=10, optimize=True):
     # try based on RuntimeError from RDKit
     try:
         # 2D to 3D with multiple conformers
-        cids = rdkit.EmbedMultipleConfs(mol=mol, numConfs=N,
-                                       useExpTorsionAnglePrefs=True,
-                                       useBasicKnowledge=True)
+        cids = rdkit.EmbedMultipleConfs(
+            mol=mol,
+            numConfs=N,
+            useExpTorsionAnglePrefs=True,
+            useBasicKnowledge=True,
+        )
         # quick UFF optimize
         for cid in cids:
             rdkit.UFFOptimizeMolecule(mol, confId=cid)

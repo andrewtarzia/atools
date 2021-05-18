@@ -18,7 +18,7 @@ import matplotlib.colors as colors
 def colors_i_like(palette=None):
     """
     A list of colours I like to choose from.
-    
+
     palette options:
         None
         Base
@@ -28,9 +28,9 @@ def colors_i_like(palette=None):
         CB_pairs
 
     """
-    
+
     if palette is None:
-         return [
+        return [
             '#FA7268', '#F8A72A', '#DAF7A6', '#900C3F', '#6BADB0',
             '#DB869D', '#F6D973', 'mediumvioletred',
             'skyblue', 'gold', 'palegreen', 'coral',
@@ -45,19 +45,19 @@ def colors_i_like(palette=None):
         ]
     elif palette == 'Wong':
         return [
-            '#000000', '#E69F00', '#56B4E9', '#009E73', '#F0E442', 
+            '#000000', '#E69F00', '#56B4E9', '#009E73', '#F0E442',
             '#0072B2', '#D55E00', '#CC79A7'
         ]
     elif palette == 'Tol':
         return [
-            '#332288', '#117733', '#44AA99', '#88CCEE', '#DDCC77', 
+            '#332288', '#117733', '#44AA99', '#88CCEE', '#DDCC77',
             '#CC6677', '#AA4499', '#882255',
         ]
     elif palette == 'CB_pairs':
         return [
-            '#FFC20A', '#0C7BDC', '#994F00', '#006CD1', '#E1BE6A', 
-            '#40B0A6', '#E66100', '#5D3A9B', '#1AFF1A', '#4B0092', 
-            '#FEFE62', '#D35FB7', '#005AB5', '#DC3220', '#1A85FF', 
+            '#FFC20A', '#0C7BDC', '#994F00', '#006CD1', '#E1BE6A',
+            '#40B0A6', '#E66100', '#5D3A9B', '#1AFF1A', '#4B0092',
+            '#FEFE62', '#D35FB7', '#005AB5', '#DC3220', '#1A85FF',
             '#D41159',
         ]
 
@@ -292,27 +292,27 @@ def histogram_plot_N(
             edgecolor=edgecolor
         )
     else:
-        for I in range(N):
+        for i_ in range(N):
             if type(color) is not list or len(Y) != N:
                 raise ValueError(
                     'Make sure color and Y are of length N'
                 )
             hist, bin_edges = np.histogram(
-                a=Y[I],
+                a=Y[i_],
                 bins=X_bins,
                 density=density
             )
-            if labels[I] is None:
+            if labels[i_] is None:
                 label = ''
             else:
-                label = labels[I]
+                label = labels[i_]
             ax.bar(
                 bin_edges[:-1],
                 hist,
                 align='edge',
-                alpha=alpha[I],
+                alpha=alpha[i_],
                 width=width,
-                color=color[I],
+                color=color[i_],
                 edgecolor=edgecolor,
                 label=label
             )

@@ -39,13 +39,13 @@ def imply_nonporous(Mol):
     PD_opt = analysis['pore_diameter_opt']['diameter']
     if PD_opt < 0:
         logging.info(f'> PD {PD}, PD_opt {PD_opt}')
-        logging.info(f'> nonporous')
+        logging.info('> nonporous')
     # compare pore_volume and pore_volume_opt
     PV = analysis['pore_volume']
     PV_opt = analysis['pore_volume_opt']
     if PV_opt < 0:
         logging.info(f'> PV {PV}, PV_opt {PV_opt}')
-        logging.info(f'> nonporous')
+        logging.info('> nonporous')
     # check min distance from cage COM to a cage atom
     COM = np.array([analysis['centre_of_mass']])
     coords = Mol.coordinates
@@ -61,7 +61,7 @@ def imply_nonporous(Mol):
     minD_P = min(Pdistances[0])
     if minD_C < 2 and minD_P < 2:
         logging.info(f'> minD_C {minD_C}, minD_P {minD_P}')
-        logging.info(f'> nonporous')
+        logging.info('> nonporous')
     # output window number
     if analysis['windows']['diameters'] is not None:
         WN = len(analysis['windows']['diameters'])
@@ -69,7 +69,7 @@ def imply_nonporous(Mol):
         WN = 0
     if WN == 0:
         logging.info(f'> WN {WN}')
-        logging.info(f'> nonporous')
+        logging.info('> nonporous')
 
 
 def check_PDB_for_pore(file, diam=0.25):
@@ -251,8 +251,8 @@ def is_solvent(molecule):
     try:
         analysis = molecule.full_analysis()
     except ValueError:
-        logging.warning(f'>>> failed pywindow full_analysis.')
-        logging.info(f'>>> assuming solvent in this case.')
+        logging.warning('>>> failed pywindow full_analysis.')
+        logging.info('>>> assuming solvent in this case.')
         return result
     pd_opt = analysis['pore_diameter_opt']['diameter']
     if analysis['windows']['diameters'] is not None:
